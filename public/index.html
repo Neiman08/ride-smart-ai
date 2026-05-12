@@ -468,11 +468,11 @@ function renderBestMove(bestMove){
         </div>
       </div>
 
-      <button class="map-btn" onclick="focusZone('${bestMove.name}')">
+      <button class="map-btn" onclick='focusZone(${JSON.stringify(bestMove.name)})'>
         📍 View on Map
       </button>
 
-      <button class="map-btn nav-btn" onclick="navigateToZone('${bestMove.name}')">
+      <button class="map-btn nav-btn" onclick='navigateToZone(${JSON.stringify(bestMove.name)})'>
         🧭 Go with Google Maps
       </button>
     </div>
@@ -662,11 +662,11 @@ async function loadZones(){
         ${zone.action}
       </div>
 
-      <button class="map-btn" onclick="focusZone('${zone.name}')">
+      <button class="map-btn" onclick='focusZone(${JSON.stringify(zone.name)})'>
         📍 View on Map
       </button>
 
-      <button class="map-btn nav-btn" onclick="navigateToZone('${zone.name}')">
+      <button class="map-btn nav-btn" onclick='navigateToZone(${JSON.stringify(zone.name)})'>
         🧭 Go with Google Maps
       </button>
 
