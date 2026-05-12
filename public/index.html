@@ -422,6 +422,14 @@ function navigateToZone(zoneName){
   window.open(url, '_blank');
 }
 
+function focusZoneEncoded(encodedName){
+  focusZone(decodeURIComponent(encodedName));
+}
+
+function navigateToZoneEncoded(encodedName){
+  navigateToZone(decodeURIComponent(encodedName));
+}
+
 function speakDecision(text){
   if(!('speechSynthesis' in window)) return;
   const msg = new SpeechSynthesisUtterance(text);
@@ -439,6 +447,8 @@ function renderBestMove(bestMove){
     container.innerHTML = '';
     return;
   }
+
+  const safeBestMoveName = encodeURIComponent(bestMove.name);
 
   container.innerHTML = `
     <div class="best-move">
@@ -468,11 +478,11 @@ function renderBestMove(bestMove){
         </div>
       </div>
 
-      <button class="map-btn" onclick='focusZone(${JSON.stringify(bestMove.name)})'>
+      <button class="map-btn" onclick="focusZoneEncoded('${safeBestMoveName}')">
         📍 View on Map
       </button>
 
-      <button class="map-btn nav-btn" onclick='navigateToZone(${JSON.stringify(bestMove.name)})'>
+      <button class="map-btn nav-btn" onclick="navigateToZoneEncoded('${safeBestMoveName}')">
         🧭 Go with Google Maps
       </button>
     </div>
@@ -652,6 +662,8 @@ async function loadZones(){
       .replaceAll(' ','-')
       .toLowerCase();
 
+    const safeZoneName = encodeURIComponent(zone.name);
+
     card.innerHTML = `
       ${index === 0 ? `<div class="top-badge">🔥 BEST AREA NOW</div>` : ''}
 
@@ -662,11 +674,11 @@ async function loadZones(){
         ${zone.action}
       </div>
 
-      <button class="map-btn" onclick='focusZone(${JSON.stringify(zone.name)})'>
+      <button class="map-btn" onclick="focusZoneEncoded('${safeZoneName}')">
         📍 View on Map
       </button>
 
-      <button class="map-btn nav-btn" onclick='navigateToZone(${JSON.stringify(zone.name)})'>
+      <button class="map-btn nav-btn" onclick="navigateToZoneEncoded('${safeZoneName}')">
         🧭 Go with Google Maps
       </button>
 
@@ -847,3 +859,4 @@ window.initRideSmart = async function(){
 
 </body>
 </html>
+
