@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Ride Smart AI</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+body{
+  font-family:'Inter',sans-serif;
+  background:#050505;
+  color:white;
+  padding:14px;
+  padding-bottom:90px;
+}
+
+.title{
+  font-size:30px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+
+.subtitle{
+  color:#999;
+  font-size:14px;
+  margin-bottom:18px;
+}
+
+.weather-banner{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  padding:14px 16px;
+  border-radius:16px;
+  margin-bottom:18px;
+  font-size:15px;
+  font-weight:800;
+}
+
+.best-move{
+  background:linear-gradient(135deg,#00ff88,#00c96b);
+  color:#000;
+  border-radius:22px;
+  padding:20px;
+  margin-bottom:18px;
+  box-shadow:0 10px 35px rgba(0,255,136,.18);
+}
+
+.best-move-label{
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:1px;
+  opacity:.8;
+}
+
+.best-move-name{
+  font-size:34px;
+  font-weight:900;
+  margin-top:8px;
+}
+
+.best-move-action{
+  margin-top:10px;
+  display:inline-block;
+  background:#000;
+  color:#00ff88;
+  padding:9px 14px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:900;
+}
+
+.best-move-grid{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.best-move-stat{
+  background:rgba(0,0,0,.18);
+  padding:12px;
+  border-radius:16px;
+}
+
+.best-move-stat-label{
+  font-size:11px;
+  font-weight:800;
+  opacity:.7;
+}
+
+.best-move-stat-value{
+  font-size:22px;
+  font-weight:900;
+  margin-top:4px;
+}
+
+.order-checker{
+  background:#111;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:22px;
+  padding:18px;
+  margin-bottom:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+.order-checker h2{
+  font-size:20px;
+  margin-bottom:12px;
+}
+
+.order-inputs{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+
+.order-inputs input{
+  width:100%;
+  padding:16px;
+  border:none;
+  outline:none;
+  border-radius:14px;
+  background:#fff;
+  color:#000;
+  font-size:18px;
+  font-weight:900;
+}
+
+.check-btn{
+  width:100%;
+  margin-top:12px;
+  padding:16px;
+  border:none;
+  border-radius:16px;
+  background:#00ff88;
+  color:#000;
+  font-size:17px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.order-result{
+  margin-top:14px;
+  padding:18px;
+  border-radius:18px;
+  font-weight:900;
+  font-size:18px;
+  line-height:1.5;
+}
+
+.good{ background:#00ff88; color:#000; }
+.medium{ background:#facc15; color:#000; }
+.bad{ background:#ef4444; color:#fff; }
+
+#locationBtn{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:18px;
+  margin-bottom:18px;
+  background:#00ff88;
+  color:#000;
+  font-size:16px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+#locationBtn:disabled{
+  background:#444;
+  cursor:not-allowed;
+}
+
+#map{
+  width:100%;
+  height:360px;
+  border-radius:22px;
+  margin-bottom:18px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 10px 40px rgba(0,0,0,.45);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+
+.card{
+  background:#111;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:22px;
+  padding:18px;
+  box-shadow:0 10px 35px rgba(0,0,0,.35);
+}
+
+.zone-name{
+  font-size:22px;
+  font-weight:900;
+}
+
+.score{
+  font-size:52px;
+  font-weight:900;
+  margin-top:8px;
+  color:#00ff88;
+}
+
+.action{
+  display:inline-block;
+  margin-top:10px;
+  padding:9px 13px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+}
+
+.go-now{ background:#00ff88; color:#000; }
+.wait-nearby{ background:#facc15; color:#000; }
+.avoid{ background:#ef4444; color:#fff; }
+
+.map-btn{
+  margin-top:12px;
+  width:100%;
+  padding:12px 14px;
+  border:none;
+  border-radius:14px;
+  background:#ffffff;
+  color:#000;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.recommendation{
+  margin-top:16px;
+  color:#bbb;
+  line-height:1.7;
+  font-size:14px;
+}
+
+.top-badge{
+  display:inline-block;
+  background:#00ff88;
+  color:black;
+  padding:8px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:14px;
+}
+
+@media(min-width:900px){
+  body{ padding:30px; }
+  .title{ font-size:42px; }
+  .subtitle{ font-size:16px; }
+  #map{ height:600px; }
+  .grid{ grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); }
+  .best-move-grid{ grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
+  .order-inputs{ grid-template-columns:1fr 1fr 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<h1 class="title">🚘 Ride Smart AI</h1>
+<p class="subtitle">Chicago & Suburbs Demand Intelligence</p>
+
+<div id="weather"></div>
+<div id="bestMove"></div>
+
+<div class="order-checker">
+  <h2>📦 Uber Order Checker</h2>
+
+  <div class="order-inputs">
+    <input id="orderPay" type="number" inputmode="decimal" placeholder="Pay $" />
+    <input id="orderMiles" type="number" inputmode="decimal" placeholder="Miles" />
+    <input id="orderMinutes" type="number" inputmode="decimal" placeholder="Minutes" />
+  </div>
+
+  <button onclick="checkOrder()" class="check-btn">
+    Analyze Order
+  </button>
+
+  <input id="uberScreenshot" type="file" accept="image/*" hidden />
+
+  <button onclick="document.getElementById('uberScreenshot').click()" class="check-btn">
+    📸 Upload Uber Screenshot
+  </button>
+
+  <div id="ocrStatus"></div>
+
+  <div id="orderResult"></div>
+</div>
+
+<button id="locationBtn">📍 Use My Location</button>
+
+<div id="map"></div>
+<div class="grid" id="zones"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+let map;
+let markers = [];
+let userMarker = null;
+let markerByZone = {};
+let infoByZone = {};
+
+let currentUserLocation = {
+  lat: 41.8781,
+  lng: -87.6298
+};
+
+const zoneLocations = {
+  "O'Hare Airport": { lat: 41.9742, lng: -87.9073 },
+  "Midway Airport": { lat: 41.7868, lng: -87.7522 },
+  "Downtown Chicago": { lat: 41.8781, lng: -87.6298 },
+  "Rosemont": { lat: 41.9953, lng: -87.8847 },
+  "Evanston": { lat: 42.0451, lng: -87.6877 },
+  "Oak Park": { lat: 41.8850, lng: -87.7845 },
+  "Naperville": { lat: 41.7508, lng: -88.1535 },
+  "Des Plaines": { lat: 42.0334, lng: -87.8834 },
+  "Skokie": { lat: 42.0324, lng: -87.7416 },
+  "Arlington Heights": { lat: 42.0884, lng: -87.9806 },
+  "Schaumburg": { lat: 42.0334, lng: -88.0834 },
+  "Cicero": { lat: 41.8456, lng: -87.7539 },
+  "Glenview": { lat: 42.0698, lng: -87.7878 },
+  "Elmhurst": { lat: 41.8995, lng: -87.9403 },
+  "Downers Grove": { lat: 41.8089, lng: -88.0112 },
+  "La Grange": { lat: 41.8050, lng: -87.8692 },
+  "Wheaton": { lat: 41.8661, lng: -88.1070 },
+  "Wilmette": { lat: 42.0723, lng: -87.7228 },
+  "Park Ridge": { lat: 42.0111, lng: -87.8406 },
+  "Berwyn": { lat: 41.8506, lng: -87.7937 },
+  "Tinley Park": { lat: 41.5734, lng: -87.7845 },
+  "Bolingbrook": { lat: 41.6986, lng: -88.0684 },
+  "Northbrook": { lat: 42.1275, lng: -87.8290 }
+};
+
+function initMap(){
+  map = new google.maps.Map(document.getElementById('map'), {
+    center:{ lat:41.8781, lng:-87.6298 },
+    zoom:10,
+    styles:[
+      { elementType:"geometry", stylers:[{ color:"#111111" }] },
+      { elementType:"labels.text.stroke", stylers:[{ color:"#111111" }] },
+      { elementType:"labels.text.fill", stylers:[{ color:"#ffffff" }] },
+      { featureType:"road", elementType:"geometry", stylers:[{ color:"#2a2a2a" }] },
+      { featureType:"water", elementType:"geometry", stylers:[{ color:"#0b1b2b" }] }
+    ]
+  });
+}
+
+function getZoneColor(score){
+  if(score >= 65) return '#00ff88';
+  if(score >= 50) return '#facc15';
+  return '#ef4444';
+}
+
+function updateMapMarkers(zones){
+  markers.forEach(marker => marker.setMap(null));
+  markers = [];
+  markerByZone = {};
+  infoByZone = {};
+
+  zones.forEach(zone => {
+    const position = zoneLocations[zone.name];
+    if(!position) return;
+
+    const color = getZoneColor(zone.score);
+
+    const marker = new google.maps.Marker({
+      position,
+      map,
+      title:`${zone.name} - Score ${zone.score}`,
+      label:{
+        text:String(zone.score),
+        color:'#000',
+        fontWeight:'900',
+        fontSize:'14px'
+      },
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        fillColor:color,
+        fillOpacity:1,
+        strokeColor:'#ffffff',
+        strokeWeight:2,
+        scale:14
+      }
+    });
+
+    const info = new google.maps.InfoWindow({
+      content:`
+        <div style="color:#111;font-family:Arial;min-width:190px;">
+          <strong>${zone.name}</strong><br>
+          Score: ${zone.score}<br>
+          Action: ${zone.action}<br>
+          Est. $/hour: $${zone.estimatedHourly}<br>
+          Drive Time: ${zone.driveTime || 'N/A'}<br>
+          Distance: ${zone.distance || 'N/A'}<br>
+          Traffic: ${zone.traffic}<br>
+          Efficiency: ${zone.efficiency}
+        </div>
+      `
+    });
+
+    marker.addListener('click', () => info.open(map, marker));
+
+    markerByZone[zone.name] = marker;
+    infoByZone[zone.name] = info;
+    markers.push(marker);
+  });
+}
+
+function focusZone(zoneName){
+  const position = zoneLocations[zoneName];
+  const marker = markerByZone[zoneName];
+  const info = infoByZone[zoneName];
+
+  if(!position || !marker) return;
+
+  map.setCenter(position);
+  map.setZoom(12);
+
+  if(info){
+    info.open(map, marker);
+  }
+
+  window.scrollTo({
+    top:document.getElementById('map').offsetTop - 20,
+    behavior:'smooth'
+  });
+}
+
+function renderBestMove(bestMove){
+  const container = document.getElementById('bestMove');
+
+  if(!bestMove){
+    container.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="best-move">
+      <div class="best-move-label">AI BEST MOVE RIGHT NOW</div>
+      <div class="best-move-name">${bestMove.name}</div>
+      <div class="best-move-action">${bestMove.action}</div>
+
+      <div class="best-move-grid">
+        <div class="best-move-stat">
+          <div class="best-move-stat-label">Efficiency</div>
+          <div class="best-move-stat-value">${bestMove.efficiency}</div>
+        </div>
+
+        <div class="best-move-stat">
+          <div class="best-move-stat-label">Drive Time</div>
+          <div class="best-move-stat-value">${bestMove.driveTime}</div>
+        </div>
+
+        <div class="best-move-stat">
+          <div class="best-move-stat-label">Distance</div>
+          <div class="best-move-stat-value">${bestMove.distance}</div>
+        </div>
+
+        <div class="best-move-stat">
+          <div class="best-move-stat-label">Est. Hourly</div>
+          <div class="best-move-stat-value">$${bestMove.estimatedHourly}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function checkOrder(){
+  const pay = parseFloat(document.getElementById('orderPay').value);
+  const miles = parseFloat(document.getElementById('orderMiles').value);
+  const minutes = parseFloat(document.getElementById('orderMinutes').value);
+
+  const result = document.getElementById('orderResult');
+
+  if(!pay || !miles || !minutes){
+    result.innerHTML = `
+      <div class="order-result bad">
+        Enter pay, miles and minutes
+      </div>
+    `;
+    return;
+  }
+
+  const dollarsPerMile = pay / miles;
+  const hourlyRate = pay / (minutes / 60);
+
+  let status = '';
+  let className = '';
+  let advice = '';
+
+  if(hourlyRate >= 30 && dollarsPerMile >= 1.50){
+    status = '✅ GOOD ORDER';
+    className = 'good';
+    advice = 'Take it. Strong money for the time.';
+  }
+  else if(hourlyRate >= 23 && hourlyRate < 30){
+    status = '⚠️ REGULAR ORDER';
+    className = 'medium';
+    advice = 'Accept only if you are close or demand is slow.';
+  }
+  else{
+    status = '❌ BAD ORDER';
+    className = 'bad';
+    advice = 'Reject it. Not worth the time.';
+  }
+
+  result.innerHTML = `
+    <div class="order-result ${className}">
+      ${status}<br>
+      $/mile: $${dollarsPerMile.toFixed(2)}<br>
+      Est. hourly: $${hourlyRate.toFixed(2)}<br>
+      ${advice}
+    </div>
+  `;
+}
+
+async function loadZones(){
+  const res = await fetch(
+    `/api/zones/best-move?lat=${currentUserLocation.lat}&lng=${currentUserLocation.lng}`
+  );
+
+  const data = await res.json();
+
+  if(!data.success){
+    console.error(data);
+    return;
+  }
+
+  document.getElementById('weather').innerHTML = `
+    <div class="weather-banner">
+      🌤️ Live AI Zone Analysis
+    </div>
+  `;
+
+  renderBestMove(data.bestMove);
+
+  const container = document.getElementById('zones');
+  container.innerHTML = '';
+
+  data.analyzedZones.forEach((zone,index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const actionClass = zone.action
+      .replaceAll(' ','-')
+      .toLowerCase();
+
+    card.innerHTML = `
+      ${index === 0 ? `<div class="top-badge">🔥 BEST AREA NOW</div>` : ''}
+
+      <div class="zone-name">${zone.name}</div>
+
+      <div class="score">${zone.score}</div>
+
+      <div class="action ${actionClass}">
+        ${zone.action}
+      </div>
+
+      <button class="map-btn" onclick="focusZone('${zone.name}')">
+        📍 View on Map
+      </button>
+
+      <div class="recommendation">
+        Estimated $/hour: $${zone.estimatedHourly}<br>
+        Drive Time: ${zone.driveTime}<br>
+        Distance: ${zone.distance}<br>
+        Traffic Score: ${zone.traffic}<br>
+        Driver Saturation: ${zone.driverSaturation}<br>
+        Efficiency: ${zone.efficiency}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  updateMapMarkers(data.analyzedZones);
+}
+
+function useMyLocation(){
+  if(!navigator.geolocation){
+    alert('Geolocation not supported');
+    return;
+  }
+
+  const btn = document.getElementById('locationBtn');
+  btn.disabled = true;
+  btn.innerText = '⌛ Locating...';
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      currentUserLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+      map.setCenter(currentUserLocation);
+      map.setZoom(12);
+
+      if(userMarker){
+        userMarker.setMap(null);
+      }
+
+      userMarker = new google.maps.Marker({
+        position: currentUserLocation,
+        map,
+        title: 'Your Location',
+        icon:{
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor:'#3b82f6',
+          fillOpacity:1,
+          strokeColor:'#ffffff',
+          strokeWeight:3,
+          scale:12
+        }
+      });
+
+      await loadZones();
+
+      btn.disabled = false;
+      btn.innerText = '📍 Use My Location';
+    },
+    (error) => {
+      console.log(error);
+      btn.disabled = false;
+      btn.innerText = '📍 Use My Location';
+
+      if(error.code === 1){
+        alert('Location permission denied. Enable it in Safari/System Settings.');
+      }else if(error.code === 2){
+        alert('Location unavailable.');
+      }else if(error.code === 3){
+        alert('Location request timeout.');
+      }else{
+        alert('Unable to get location.');
+      }
+    },
+    {
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:0
+    }
+  );
+}
+
+document.getElementById('uberScreenshot').addEventListener('change', async function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const status = document.getElementById('ocrStatus');
+
+  status.innerHTML = `
+    <div class="order-result medium">
+      Reading Uber order...
+    </div>
+  `;
+
+  try{
+    const result = await Tesseract.recognize(file, 'eng');
+
+    const text = result.data.text;
+    console.log('OCR TEXT:', text);
+
+    const payMatch = text.match(/\$ ?(\d+(\.\d{1,2})?)/);
+    const milesMatch = text.match(/(\d+(\.\d+)?)\s*(mi|mile|miles)/i);
+    const minutesMatch = text.match(/(\d+)\s*(min|mins|minutes)/i);
+
+    if(payMatch){
+      document.getElementById('orderPay').value = payMatch[1];
+    }
+
+    if(milesMatch){
+      document.getElementById('orderMiles').value = milesMatch[1];
+    }
+
+    if(minutesMatch){
+      document.getElementById('orderMinutes').value = minutesMatch[1];
+    }
+
+    status.innerHTML = `
+      <div class="order-result good">
+        Screenshot read. Check the numbers and analyze.
+      </div>
+    `;
+
+    checkOrder();
+
+  }catch(error){
+    console.log('OCR Error:', error);
+
+    status.innerHTML = `
+      <div class="order-result bad">
+        Could not read screenshot. Enter numbers manually.
+      </div>
+    `;
+  }
+});
+
+window.initRideSmart = async function(){
+  initMap();
+  await loadZones();
+
+  document
+    .getElementById('locationBtn')
+    .addEventListener('click', useMyLocation);
+
+  setInterval(() => {
+    loadZones();
+  }, 60000);
+};
+</script>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=REPLACE_GOOGLE_MAPS_API_KEY&callback=initRideSmart"></script>
+
+</body>
+</html>
