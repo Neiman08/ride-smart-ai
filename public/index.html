@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
-*{ margin:0; padding:0; box-sizing:border-box; }
+*{margin:0;padding:0;box-sizing:border-box}
 
 body{
   font-family:'Inter',sans-serif;
@@ -18,17 +18,8 @@ body{
   padding-bottom:90px;
 }
 
-.title{
-  font-size:30px;
-  font-weight:900;
-  margin-bottom:6px;
-}
-
-.subtitle{
-  color:#999;
-  font-size:14px;
-  margin-bottom:18px;
-}
+.title{font-size:30px;font-weight:900;margin-bottom:6px}
+.subtitle{color:#999;font-size:14px;margin-bottom:18px}
 
 .weather-banner{
   background:rgba(255,255,255,.08);
@@ -49,18 +40,8 @@ body{
   box-shadow:0 10px 35px rgba(0,255,136,.18);
 }
 
-.best-move-label{
-  font-size:12px;
-  font-weight:900;
-  letter-spacing:1px;
-  opacity:.8;
-}
-
-.best-move-name{
-  font-size:34px;
-  font-weight:900;
-  margin-top:8px;
-}
+.best-move-label{font-size:12px;font-weight:900;letter-spacing:1px;opacity:.8}
+.best-move-name{font-size:34px;font-weight:900;margin-top:8px}
 
 .best-move-action{
   margin-top:10px;
@@ -86,17 +67,8 @@ body{
   border-radius:16px;
 }
 
-.best-move-stat-label{
-  font-size:11px;
-  font-weight:800;
-  opacity:.7;
-}
-
-.best-move-stat-value{
-  font-size:22px;
-  font-weight:900;
-  margin-top:4px;
-}
+.best-move-stat-label{font-size:11px;font-weight:800;opacity:.7}
+.best-move-stat-value{font-size:22px;font-weight:900;margin-top:4px}
 
 .order-checker{
   background:#111;
@@ -107,10 +79,7 @@ body{
   box-shadow:0 10px 30px rgba(0,0,0,.35);
 }
 
-.order-checker h2{
-  font-size:20px;
-  margin-bottom:12px;
-}
+.order-checker h2{font-size:20px;margin-bottom:12px}
 
 .order-inputs{
   display:grid;
@@ -152,9 +121,28 @@ body{
   line-height:1.5;
 }
 
-.good{ background:#00ff88; color:#000; }
-.medium{ background:#facc15; color:#000; }
-.bad{ background:#ef4444; color:#fff; }
+.good{background:#00ff88;color:#000}
+.medium{background:#facc15;color:#000}
+.bad{background:#ef4444;color:#fff}
+
+.ai-breakdown{
+  margin-top:14px;
+  background:#181818;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  padding:16px;
+  color:#ddd;
+  line-height:1.7;
+  font-size:15px;
+}
+
+.ai-breakdown strong{color:#fff}
+
+.big-decision{
+  font-size:28px;
+  font-weight:900;
+  margin-bottom:10px;
+}
 
 #locationBtn{
   width:100%;
@@ -169,10 +157,7 @@ body{
   cursor:pointer;
 }
 
-#locationBtn:disabled{
-  background:#444;
-  cursor:not-allowed;
-}
+#locationBtn:disabled{background:#444;cursor:not-allowed}
 
 #map{
   width:100%;
@@ -198,10 +183,7 @@ body{
   box-shadow:0 10px 35px rgba(0,0,0,.35);
 }
 
-.zone-name{
-  font-size:22px;
-  font-weight:900;
-}
+.zone-name{font-size:22px;font-weight:900}
 
 .score{
   font-size:52px;
@@ -219,21 +201,23 @@ body{
   font-weight:900;
 }
 
-.go-now{ background:#00ff88; color:#000; }
-.wait-nearby{ background:#facc15; color:#000; }
-.avoid{ background:#ef4444; color:#fff; }
+.go-now{background:#00ff88;color:#000}
+.wait-nearby{background:#facc15;color:#000}
+.avoid{background:#ef4444;color:#fff}
 
 .map-btn{
   margin-top:12px;
   width:100%;
-  padding:12px 14px;
+  padding:13px 14px;
   border:none;
   border-radius:14px;
-  background:#ffffff;
+  background:#fff;
   color:#000;
   font-weight:900;
   cursor:pointer;
 }
+
+.nav-btn{background:#00ff88;color:#000}
 
 .recommendation{
   margin-top:16px;
@@ -254,13 +238,13 @@ body{
 }
 
 @media(min-width:900px){
-  body{ padding:30px; }
-  .title{ font-size:42px; }
-  .subtitle{ font-size:16px; }
-  #map{ height:600px; }
-  .grid{ grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); }
-  .best-move-grid{ grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
-  .order-inputs{ grid-template-columns:1fr 1fr 1fr; }
+  body{padding:30px}
+  .title{font-size:42px}
+  .subtitle{font-size:16px}
+  #map{height:600px}
+  .grid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .best-move-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .order-inputs{grid-template-columns:repeat(6,1fr)}
 }
 </style>
 </head>
@@ -268,7 +252,7 @@ body{
 <body>
 
 <h1 class="title">🚘 Ride Smart AI</h1>
-<p class="subtitle">Chicago & Suburbs Demand Intelligence</p>
+<p class="subtitle">Smart Uber Decision Engine</p>
 
 <div id="weather"></div>
 <div id="bestMove"></div>
@@ -278,13 +262,14 @@ body{
 
   <div class="order-inputs">
     <input id="orderPay" type="number" inputmode="decimal" placeholder="Pay $" />
-    <input id="orderMiles" type="number" inputmode="decimal" placeholder="Miles" />
-    <input id="orderMinutes" type="number" inputmode="decimal" placeholder="Minutes" />
+    <input id="passengerRating" type="number" inputmode="decimal" placeholder="Rating" />
+    <input id="pickupMinutes" type="number" inputmode="decimal" placeholder="Pickup Min" />
+    <input id="pickupMiles" type="number" inputmode="decimal" placeholder="Pickup Mi" />
+    <input id="tripMinutes" type="number" inputmode="decimal" placeholder="Trip Min" />
+    <input id="tripMiles" type="number" inputmode="decimal" placeholder="Trip Mi" />
   </div>
 
-  <button onclick="checkOrder()" class="check-btn">
-    Analyze Order
-  </button>
+  <button onclick="checkOrder()" class="check-btn">Analyze Order</button>
 
   <input id="uberScreenshot" type="file" accept="image/*" hidden />
 
@@ -293,7 +278,6 @@ body{
   </button>
 
   <div id="ocrStatus"></div>
-
   <div id="orderResult"></div>
 </div>
 
@@ -311,35 +295,32 @@ let userMarker = null;
 let markerByZone = {};
 let infoByZone = {};
 
-let currentUserLocation = {
-  lat: 41.8781,
-  lng: -87.6298
-};
+let currentUserLocation = { lat:41.8781, lng:-87.6298 };
 
 const zoneLocations = {
-  "O'Hare Airport": { lat: 41.9742, lng: -87.9073 },
-  "Midway Airport": { lat: 41.7868, lng: -87.7522 },
-  "Downtown Chicago": { lat: 41.8781, lng: -87.6298 },
-  "Rosemont": { lat: 41.9953, lng: -87.8847 },
-  "Evanston": { lat: 42.0451, lng: -87.6877 },
-  "Oak Park": { lat: 41.8850, lng: -87.7845 },
-  "Naperville": { lat: 41.7508, lng: -88.1535 },
-  "Des Plaines": { lat: 42.0334, lng: -87.8834 },
-  "Skokie": { lat: 42.0324, lng: -87.7416 },
-  "Arlington Heights": { lat: 42.0884, lng: -87.9806 },
-  "Schaumburg": { lat: 42.0334, lng: -88.0834 },
-  "Cicero": { lat: 41.8456, lng: -87.7539 },
-  "Glenview": { lat: 42.0698, lng: -87.7878 },
-  "Elmhurst": { lat: 41.8995, lng: -87.9403 },
-  "Downers Grove": { lat: 41.8089, lng: -88.0112 },
-  "La Grange": { lat: 41.8050, lng: -87.8692 },
-  "Wheaton": { lat: 41.8661, lng: -88.1070 },
-  "Wilmette": { lat: 42.0723, lng: -87.7228 },
-  "Park Ridge": { lat: 42.0111, lng: -87.8406 },
-  "Berwyn": { lat: 41.8506, lng: -87.7937 },
-  "Tinley Park": { lat: 41.5734, lng: -87.7845 },
-  "Bolingbrook": { lat: 41.6986, lng: -88.0684 },
-  "Northbrook": { lat: 42.1275, lng: -87.8290 }
+  "O'Hare Airport": { lat:41.9742, lng:-87.9073 },
+  "Midway Airport": { lat:41.7868, lng:-87.7522 },
+  "Downtown Chicago": { lat:41.8781, lng:-87.6298 },
+  "Rosemont": { lat:41.9953, lng:-87.8847 },
+  "Evanston": { lat:42.0451, lng:-87.6877 },
+  "Oak Park": { lat:41.8850, lng:-87.7845 },
+  "Naperville": { lat:41.7508, lng:-88.1535 },
+  "Des Plaines": { lat:42.0334, lng:-87.8834 },
+  "Skokie": { lat:42.0324, lng:-87.7416 },
+  "Arlington Heights": { lat:42.0884, lng:-87.9806 },
+  "Schaumburg": { lat:42.0334, lng:-88.0834 },
+  "Cicero": { lat:41.8456, lng:-87.7539 },
+  "Glenview": { lat:42.0698, lng:-87.7878 },
+  "Elmhurst": { lat:41.8995, lng:-87.9403 },
+  "Downers Grove": { lat:41.8089, lng:-88.0112 },
+  "La Grange": { lat:41.8050, lng:-87.8692 },
+  "Wheaton": { lat:41.8661, lng:-88.1070 },
+  "Wilmette": { lat:42.0723, lng:-87.7228 },
+  "Park Ridge": { lat:42.0111, lng:-87.8406 },
+  "Berwyn": { lat:41.8506, lng:-87.7937 },
+  "Tinley Park": { lat:41.5734, lng:-87.7845 },
+  "Bolingbrook": { lat:41.6986, lng:-88.0684 },
+  "Northbrook": { lat:42.1275, lng:-87.8290 }
 };
 
 function initMap(){
@@ -372,8 +353,6 @@ function updateMapMarkers(zones){
     const position = zoneLocations[zone.name];
     if(!position) return;
 
-    const color = getZoneColor(zone.score);
-
     const marker = new google.maps.Marker({
       position,
       map,
@@ -386,7 +365,7 @@ function updateMapMarkers(zones){
       },
       icon:{
         path:google.maps.SymbolPath.CIRCLE,
-        fillColor:color,
+        fillColor:getZoneColor(zone.score),
         fillOpacity:1,
         strokeColor:'#ffffff',
         strokeWeight:2,
@@ -419,17 +398,38 @@ function updateMapMarkers(zones){
 
 function focusZone(zoneName){
   const position = zoneLocations[zoneName];
+  const marker = markerByZone[zoneName];
+  const info = infoByZone[zoneName];
 
-  if(!position) return;
+  if(!position || !marker) return;
 
-  // CENTRAR MAPA
   map.setCenter(position);
   map.setZoom(13);
 
-  // ABRIR GOOGLE MAPS REAL
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${position.lat},${position.lng}&travelmode=driving`;
+  if(info) info.open(map, marker);
 
+  window.scrollTo({
+    top:document.getElementById('map').offsetTop - 20,
+    behavior:'smooth'
+  });
+}
+
+function navigateToZone(zoneName){
+  const position = zoneLocations[zoneName];
+  if(!position) return;
+
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${position.lat},${position.lng}&travelmode=driving`;
   window.open(url, '_blank');
+}
+
+function speakDecision(text){
+  if(!('speechSynthesis' in window)) return;
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = 'en-US';
+  msg.rate = 1;
+  msg.pitch = 1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(msg);
 }
 
 function renderBestMove(bestMove){
@@ -467,61 +467,142 @@ function renderBestMove(bestMove){
           <div class="best-move-stat-value">$${bestMove.estimatedHourly}</div>
         </div>
       </div>
+
+      <button class="map-btn" onclick="focusZone('${bestMove.name}')">
+        📍 View on Map
+      </button>
+
+      <button class="map-btn nav-btn" onclick="navigateToZone('${bestMove.name}')">
+        🧭 Go with Google Maps
+      </button>
     </div>
   `;
+}
+
+function detectDestinationRisk(text){
+  const clean = text.toLowerCase();
+
+  if(clean.includes('airport') || clean.includes('terminal') || clean.includes("o'hare") || clean.includes('midway')){
+    return { label:'Airport Signal', score:8 };
+  }
+
+  if(clean.includes('downtown') || clean.includes('w lake') || clean.includes('jefferson') || clean.includes('chicago')){
+    return { label:'Downtown / Traffic Risk', score:-8 };
+  }
+
+  return { label:'Neutral Destination', score:0 };
+}
+
+function evaluatePassengerRating(rating){
+  if(!rating) return { label:'Unknown rating', tipScore:0, riskScore:-3 };
+
+  if(rating >= 4.95) return { label:'Excellent passenger / high tip chance', tipScore:10, riskScore:0 };
+  if(rating >= 4.85) return { label:'Good passenger / decent tip chance', tipScore:6, riskScore:0 };
+  if(rating >= 4.75) return { label:'Average passenger / normal risk', tipScore:2, riskScore:-3 };
+  return { label:'Low rating / higher risk', tipScore:-6, riskScore:-10 };
 }
 
 function checkOrder(){
   const pay = parseFloat(document.getElementById('orderPay').value);
-  const miles = parseFloat(document.getElementById('orderMiles').value);
-  const minutes = parseFloat(document.getElementById('orderMinutes').value);
+  const rating = parseFloat(document.getElementById('passengerRating').value);
+  const pickupMinutes = parseFloat(document.getElementById('pickupMinutes').value) || 0;
+  const pickupMiles = parseFloat(document.getElementById('pickupMiles').value) || 0;
+  const tripMinutes = parseFloat(document.getElementById('tripMinutes').value) || 0;
+  const tripMiles = parseFloat(document.getElementById('tripMiles').value) || 0;
 
   const result = document.getElementById('orderResult');
 
-  if(!pay || !miles || !minutes){
-    result.innerHTML = `
-      <div class="order-result bad">
-        Enter pay, miles and minutes
-      </div>
-    `;
+  if(!pay || (!pickupMinutes && !tripMinutes) || (!pickupMiles && !tripMiles)){
+    result.innerHTML = `<div class="order-result bad">Enter pay, pickup/trip miles and pickup/trip minutes</div>`;
     return;
   }
 
-  const dollarsPerMile = pay / miles;
-  const hourlyRate = pay / (minutes / 60);
+  const totalMinutes = pickupMinutes + tripMinutes;
+  const totalMiles = pickupMiles + tripMiles;
+
+  const dollarsPerMile = pay / totalMiles;
+  const hourlyRate = pay / (totalMinutes / 60);
+
+  const passenger = evaluatePassengerRating(rating);
+
+  let baseScore = 50;
+
+  if(hourlyRate >= 35) baseScore += 22;
+  else if(hourlyRate >= 30) baseScore += 16;
+  else if(hourlyRate >= 25) baseScore += 8;
+  else if(hourlyRate >= 20) baseScore += 0;
+  else baseScore -= 14;
+
+  if(dollarsPerMile >= 2) baseScore += 14;
+  else if(dollarsPerMile >= 1.5) baseScore += 8;
+  else if(dollarsPerMile >= 1.1) baseScore += 0;
+  else baseScore -= 16;
+
+  if(pickupMinutes >= 20) baseScore -= 12;
+  else if(pickupMinutes >= 15) baseScore -= 8;
+  else if(pickupMinutes <= 6) baseScore += 6;
+
+  if(pickupMiles >= 10) baseScore -= 12;
+  else if(pickupMiles >= 7) baseScore -= 8;
+
+  if(totalMinutes >= 60) baseScore -= 5;
+
+  baseScore += passenger.tipScore;
+  baseScore += passenger.riskScore;
+
+  if(baseScore > 100) baseScore = 100;
+  if(baseScore < 0) baseScore = 0;
 
   let status = '';
   let className = '';
+  let voice = '';
   let advice = '';
 
-  if(hourlyRate >= 30 && dollarsPerMile >= 1.50){
-    status = '✅ GOOD ORDER';
+  if(baseScore >= 72){
+    status = '✅ TAKE ORDER';
     className = 'good';
-    advice = 'Take it. Strong money for the time.';
+    advice = 'Strong order. Good money and acceptable risk.';
+    voice = 'Good order. Take it.';
   }
-  else if(hourlyRate >= 23 && hourlyRate < 30){
-    status = '⚠️ REGULAR ORDER';
+  else if(baseScore >= 55){
+    status = '⚠️ BORDERLINE ORDER';
     className = 'medium';
-    advice = 'Accept only if you are close or demand is slow.';
+    advice = 'Accept only if market is slow or destination helps you.';
+    voice = 'Regular order. Be careful.';
   }
   else{
-    status = '❌ BAD ORDER';
+    status = '❌ REJECT ORDER';
     className = 'bad';
-    advice = 'Reject it. Not worth the time.';
+    advice = 'Not worth the real time, miles, or risk.';
+    voice = 'Bad order. Reject it.';
   }
 
   result.innerHTML = `
     <div class="order-result ${className}">
-      ${status}<br>
+      <div class="big-decision">${status}</div>
+      Final Score: ${baseScore}/100<br>
+      Pay: $${pay.toFixed(2)}<br>
+      Passenger Rating: ${rating ? rating.toFixed(2) : 'Unknown'}<br>
+      Total Miles: ${totalMiles.toFixed(1)} mi<br>
+      Total Minutes: ${totalMinutes.toFixed(0)} min<br>
       $/mile: $${dollarsPerMile.toFixed(2)}<br>
-      Est. hourly: $${hourlyRate.toFixed(2)}<br>
+      Real hourly: $${hourlyRate.toFixed(2)}<br>
       ${advice}
     </div>
+
+    <div class="ai-breakdown">
+      <strong>Pickup:</strong> ${pickupMinutes || 0} min / ${pickupMiles || 0} mi<br>
+      <strong>Trip:</strong> ${tripMinutes || 0} min / ${tripMiles || 0} mi<br>
+      <strong>Passenger Signal:</strong> ${passenger.label}<br>
+      <strong>Dead Miles Risk:</strong> ${pickupMiles >= 10 ? 'High' : pickupMiles >= 7 ? 'Medium' : 'Low'}<br>
+      <strong>Long Trip Risk:</strong> ${totalMinutes >= 60 ? 'Yes' : 'No'}
+    </div>
   `;
+
+  speakDecision(voice);
 }
 
 async function loadZones(){
-
   const res = await fetch(
     `/api/zones/best-move?lat=${currentUserLocation.lat}&lng=${currentUserLocation.lng}&t=${Date.now()}`
   );
@@ -533,12 +614,7 @@ async function loadZones(){
     return;
   }
 
-  // ORDENAR DINÁMICAMENTE
-  data.analyzedZones.sort((a,b) => b.score - a.score);
-
-  // CAMBIO DINÁMICO DE SCORES
   data.analyzedZones = data.analyzedZones.map(zone => {
-
     const randomBoost = Math.floor(Math.random() * 8) - 4;
 
     let newScore = zone.score + randomBoost;
@@ -548,24 +624,13 @@ async function loadZones(){
 
     let action = 'AVOID';
 
-    if(newScore >= 65){
-      action = 'GO NOW';
-    }
-    else if(newScore >= 50){
-      action = 'WAIT NEARBY';
-    }
+    if(newScore >= 65) action = 'GO NOW';
+    else if(newScore >= 50) action = 'WAIT NEARBY';
 
-    return {
-      ...zone,
-      score:newScore,
-      action
-    };
+    return { ...zone, score:newScore, action };
   });
 
-  // REORDENAR OTRA VEZ
   data.analyzedZones.sort((a,b) => b.score - a.score);
-
-  // BEST MOVE REAL
   data.bestMove = data.analyzedZones[0];
 
   document.getElementById('weather').innerHTML = `
@@ -580,9 +645,7 @@ async function loadZones(){
   container.innerHTML = '';
 
   data.analyzedZones.forEach((zone,index) => {
-
     const card = document.createElement('div');
-
     card.className = 'card';
 
     const actionClass = zone.action
@@ -593,7 +656,6 @@ async function loadZones(){
       ${index === 0 ? `<div class="top-badge">🔥 BEST AREA NOW</div>` : ''}
 
       <div class="zone-name">${zone.name}</div>
-
       <div class="score">${zone.score}</div>
 
       <div class="action ${actionClass}">
@@ -601,7 +663,11 @@ async function loadZones(){
       </div>
 
       <button class="map-btn" onclick="focusZone('${zone.name}')">
-        📍 GO TO ZONE
+        📍 View on Map
+      </button>
+
+      <button class="map-btn nav-btn" onclick="navigateToZone('${zone.name}')">
+        🧭 Go with Google Maps
       </button>
 
       <div class="recommendation">
@@ -647,9 +713,9 @@ function useMyLocation(){
       userMarker = new google.maps.Marker({
         position: currentUserLocation,
         map,
-        title: 'Your Location',
+        title:'Your Location',
         icon:{
-          path: google.maps.SymbolPath.CIRCLE,
+          path:google.maps.SymbolPath.CIRCLE,
           fillColor:'#3b82f6',
           fillOpacity:1,
           strokeColor:'#ffffff',
@@ -663,20 +729,10 @@ function useMyLocation(){
       btn.disabled = false;
       btn.innerText = '📍 Use My Location';
     },
-    (error) => {
-      console.log(error);
+    () => {
       btn.disabled = false;
       btn.innerText = '📍 Use My Location';
-
-      if(error.code === 1){
-        alert('Location permission denied. Enable it in Safari/System Settings.');
-      }else if(error.code === 2){
-        alert('Location unavailable.');
-      }else if(error.code === 3){
-        alert('Location request timeout.');
-      }else{
-        alert('Unable to get location.');
-      }
+      alert('Unable to get location.');
     },
     {
       enableHighAccuracy:true,
@@ -686,47 +742,73 @@ function useMyLocation(){
   );
 }
 
+function parseUberText(text){
+  const clean = text.replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+
+  const payMatch = clean.match(/\$ ?(\d+(\.\d{1,2})?)/);
+  const ratingMatch = clean.match(/(?:★|⭐|\*)?\s*(4\.\d{1,2})/);
+
+  const segments = [...clean.matchAll(/(\d+)\s*(?:hr|h)?\s*(\d+)?\s*min\s*\(?\s*(\d+(\.\d+)?)\s*mi\s*\)?/gi)];
+
+  let pickupMinutes = 0;
+  let pickupMiles = 0;
+  let tripMinutes = 0;
+  let tripMiles = 0;
+
+  if(segments.length >= 1){
+    const s = segments[0];
+    const hr = s[1] && clean.slice(s.index, s.index + 20).toLowerCase().includes('hr') ? parseFloat(s[1]) : 0;
+    const min = hr ? parseFloat(s[2] || 0) : parseFloat(s[1] || 0);
+    pickupMinutes = (hr * 60) + min;
+    pickupMiles = parseFloat(s[3]);
+  }
+
+  if(segments.length >= 2){
+    const s = segments[1];
+    const part = clean.slice(s.index, s.index + 25).toLowerCase();
+    const hasHour = part.includes('hr') || part.includes('h ');
+    const hr = hasHour ? parseFloat(s[1]) : 0;
+    const min = hasHour ? parseFloat(s[2] || 0) : parseFloat(s[1] || 0);
+    tripMinutes = (hr * 60) + min;
+    tripMiles = parseFloat(s[3]);
+  }
+
+  return {
+    pay: payMatch ? parseFloat(payMatch[1]) : null,
+    rating: ratingMatch ? parseFloat(ratingMatch[1]) : null,
+    pickupMinutes,
+    pickupMiles,
+    tripMinutes,
+    tripMiles
+  };
+}
+
 document.getElementById('uberScreenshot').addEventListener('change', async function(e){
   const file = e.target.files[0];
   if(!file) return;
 
   const status = document.getElementById('ocrStatus');
 
-  status.innerHTML = `
-    <div class="order-result medium">
-      Reading Uber order...
-    </div>
-  `;
+  status.innerHTML = `<div class="order-result medium">Reading Uber order...</div>`;
 
   try{
     const result = await Tesseract.recognize(file, 'eng');
-
     const text = result.data.text;
+
     console.log('OCR TEXT:', text);
 
-    const payMatch = text.match(/\$ ?(\d+(\.\d{1,2})?)/);
-    const tripMatches = [...text.matchAll(/(\d+)\s*min\s*\(?\s*(\d+(\.\d+)?)\s*mi\s*\)?/gi)];
+    const parsed = parseUberText(text);
 
-    let totalMinutes = 0;
-    let totalMiles = 0;
-
-    tripMatches.forEach(match => {
-      totalMinutes += parseFloat(match[1]);
-      totalMiles += parseFloat(match[2]);
-    });
-
-    if(totalMinutes > 0 && totalMiles > 0){
-      document.getElementById('orderMinutes').value = totalMinutes;
-      document.getElementById('orderMiles').value = totalMiles.toFixed(1);
-    }
-
-    if(payMatch){
-      document.getElementById('orderPay').value = payMatch[1];
-    }
+    if(parsed.pay) document.getElementById('orderPay').value = parsed.pay;
+    if(parsed.rating) document.getElementById('passengerRating').value = parsed.rating;
+    if(parsed.pickupMinutes) document.getElementById('pickupMinutes').value = parsed.pickupMinutes;
+    if(parsed.pickupMiles) document.getElementById('pickupMiles').value = parsed.pickupMiles;
+    if(parsed.tripMinutes) document.getElementById('tripMinutes').value = parsed.tripMinutes;
+    if(parsed.tripMiles) document.getElementById('tripMiles').value = parsed.tripMiles;
 
     status.innerHTML = `
       <div class="order-result good">
-        Screenshot read. Check the numbers and analyze.
+        Screenshot read. Pickup, trip, rating and pay detected.
       </div>
     `;
 
