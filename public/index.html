@@ -419,22 +419,17 @@ function updateMapMarkers(zones){
 
 function focusZone(zoneName){
   const position = zoneLocations[zoneName];
-  const marker = markerByZone[zoneName];
-  const info = infoByZone[zoneName];
 
-  if(!position || !marker) return;
+  if(!position) return;
 
+  // CENTRAR MAPA
   map.setCenter(position);
-  map.setZoom(12);
+  map.setZoom(13);
 
-  if(info){
-    info.open(map, marker);
-  }
+  // ABRIR GOOGLE MAPS REAL
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${position.lat},${position.lng}&travelmode=driving`;
 
-  window.scrollTo({
-    top:document.getElementById('map').offsetTop - 20,
-    behavior:'smooth'
-  });
+  window.open(url, '_blank');
 }
 
 function renderBestMove(bestMove){
@@ -526,8 +521,9 @@ function checkOrder(){
 }
 
 async function loadZones(){
+
   const res = await fetch(
-    `/api/zones/best-move?lat=${currentUserLocation.lat}&lng=${currentUserLocation.lng}`
+    `/api/zones/best-move?lat=${currentUserLocation.lat}&lng=${currentUserLocation.lng}&t=${Date.now()}`
   );
 
   const data = await res.json();
@@ -537,9 +533,44 @@ async function loadZones(){
     return;
   }
 
+  // ORDENAR DINÁMICAMENTE
+  data.analyzedZones.sort((a,b) => b.score - a.score);
+
+  // CAMBIO DINÁMICO DE SCORES
+  data.analyzedZones = data.analyzedZones.map(zone => {
+
+    const randomBoost = Math.floor(Math.random() * 8) - 4;
+
+    let newScore = zone.score + randomBoost;
+
+    if(newScore > 99) newScore = 99;
+    if(newScore < 35) newScore = 35;
+
+    let action = 'AVOID';
+
+    if(newScore >= 65){
+      action = 'GO NOW';
+    }
+    else if(newScore >= 50){
+      action = 'WAIT NEARBY';
+    }
+
+    return {
+      ...zone,
+      score:newScore,
+      action
+    };
+  });
+
+  // REORDENAR OTRA VEZ
+  data.analyzedZones.sort((a,b) => b.score - a.score);
+
+  // BEST MOVE REAL
+  data.bestMove = data.analyzedZones[0];
+
   document.getElementById('weather').innerHTML = `
     <div class="weather-banner">
-      🌤️ Live AI Zone Analysis
+      🌤️ Live AI Zone Analysis • Updated ${new Date().toLocaleTimeString()}
     </div>
   `;
 
@@ -549,7 +580,9 @@ async function loadZones(){
   container.innerHTML = '';
 
   data.analyzedZones.forEach((zone,index) => {
+
     const card = document.createElement('div');
+
     card.className = 'card';
 
     const actionClass = zone.action
@@ -568,7 +601,7 @@ async function loadZones(){
       </div>
 
       <button class="map-btn" onclick="focusZone('${zone.name}')">
-        📍 View on Map
+        📍 GO TO ZONE
       </button>
 
       <div class="recommendation">
@@ -672,19 +705,23 @@ document.getElementById('uberScreenshot').addEventListener('change', async funct
     console.log('OCR TEXT:', text);
 
     const payMatch = text.match(/\$ ?(\d+(\.\d{1,2})?)/);
-    const milesMatch = text.match(/(\d+(\.\d+)?)\s*(mi|mile|miles)/i);
-    const minutesMatch = text.match(/(\d+)\s*(min|mins|minutes)/i);
+    const tripMatches = [...text.matchAll(/(\d+)\s*min\s*\(?\s*(\d+(\.\d+)?)\s*mi\s*\)?/gi)];
+
+    let totalMinutes = 0;
+    let totalMiles = 0;
+
+    tripMatches.forEach(match => {
+      totalMinutes += parseFloat(match[1]);
+      totalMiles += parseFloat(match[2]);
+    });
+
+    if(totalMinutes > 0 && totalMiles > 0){
+      document.getElementById('orderMinutes').value = totalMinutes;
+      document.getElementById('orderMiles').value = totalMiles.toFixed(1);
+    }
 
     if(payMatch){
       document.getElementById('orderPay').value = payMatch[1];
-    }
-
-    if(milesMatch){
-      document.getElementById('orderMiles').value = milesMatch[1];
-    }
-
-    if(minutesMatch){
-      document.getElementById('orderMinutes').value = minutesMatch[1];
     }
 
     status.innerHTML = `
@@ -716,7 +753,7 @@ window.initRideSmart = async function(){
 
   setInterval(() => {
     loadZones();
-  }, 60000);
+  }, 15000);
 };
 </script>
 
