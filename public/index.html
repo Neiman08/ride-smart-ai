@@ -200,6 +200,66 @@ body{
   margin-bottom:14px;
 }
 
+.zone-card-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.risk-label{
+  margin-top:7px;
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+}
+
+.risk-label.low{
+  background:rgba(0,255,136,.16);
+  color:#00ff88;
+}
+
+.risk-label.medium{
+  background:rgba(250,204,21,.18);
+  color:#facc15;
+}
+
+.risk-label.high{
+  background:rgba(239,68,68,.18);
+  color:#ef4444;
+}
+
+.risk-low{
+  border-color:rgba(0,255,136,.35);
+}
+
+.risk-medium{
+  border-color:rgba(250,204,21,.45);
+}
+
+.risk-high{
+  border-color:rgba(239,68,68,.45);
+}
+
+.ai-insights{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+
+.insight-pill{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+  color:#e5e7eb;
+  padding:8px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+}
+
 /* --- PREMIUM CSS SECTIONS --- */
 .premium-result{
   margin-top:18px;
@@ -769,62 +829,132 @@ function addToEarnings(amount){
 }
 
 async function loadZones(){
-  const zones = Object.keys(zoneLocations).map(name => {
-    const randomScore = Math.floor(Math.random() * 65) + 35;
-    let action = 'AVOID';
-    if(randomScore >= 65) action = 'GO NOW';
-    else if(randomScore >= 50) action = 'WAIT NEARBY';
+  const container = document.getElementById('zones');
+  if(!container) return;
 
-    return {
-      name,
-      score: randomScore,
-      action,
-      estimatedHourly: (Math.random() * 15 + 25).toFixed(2),
-      driveTime: Math.floor(Math.random() * 30) + ' min',
-      distance: (Math.random() * 15).toFixed(1) + ' mi',
-      traffic: 'Moderate',
-      driverSaturation: 'Low',
-      efficiency: (Math.random() * 20 + 70).toFixed(0) + '%'
-    };
-  });
-
-  zones.sort((a,b) => b.score - a.score);
-  
-  document.getElementById('weather').innerHTML = `
-    <div class="weather-banner">
-      🌤️ Live AI Zone Analysis • Updated ${new Date().toLocaleTimeString()}
+  container.innerHTML = `
+    <div class="card">
+      <div class="zone-name">Loading AI zones...</div>
+      <div class="recommendation">Calculating traffic, demand, flights and efficiency.</div>
     </div>
   `;
 
-  renderBestMove(zones[0]);
+  try{
+    const response = await fetch(`/api/zones?t=${Date.now()}`);
+    const data = await response.json();
 
-  const container = document.getElementById('zones');
-  if(!container) return;
-  container.innerHTML = '';
+    if(!data.success){
+      throw new Error(data.error || 'Zones API error');
+    }
 
-  zones.forEach((zone,index) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    const actionClass = zone.action.replaceAll(' ','-').toLowerCase();
-    const safeZoneName = encodeURIComponent(zone.name);
-    const position = zoneLocations[zone.name];
+    let zones = data.bestZones || [];
 
-    card.innerHTML = `
-      ${index === 0 ? `<div class="top-badge">🔥 BEST AREA NOW</div>` : ''}
-      <div class="zone-name">${zone.name}</div>
-      <div class="score">${zone.score}</div>
-      <div class="action ${actionClass}">${zone.action}</div>
-      <button class="map-btn" onclick="focusZoneEncoded('${safeZoneName}')">📍 View on Map</button>
-      <button class="map-btn nav-btn" onclick="window.location.href='https://www.google.com/maps/dir/?api=1&destination=${position.lat},${position.lng}&travelmode=driving'">🧭 Nav</button>
-      <div class="recommendation">
-        Est. $/hr: $${zone.estimatedHourly}<br>
-        Efficiency: ${zone.efficiency}
+    zones = zones.map(zone => {
+      const efficiency =
+        zone.efficiency ||
+        Math.round(
+          zone.score +
+          zone.estimatedHourly -
+          ((zone.driveMinutes || 0) * 0.8) -
+          ((zone.driverSaturation || 0) * 0.15)
+        );
+
+      return {
+        ...zone,
+        efficiency
+      };
+    });
+
+    zones.sort((a,b) => b.score - a.score);
+
+    document.getElementById('weather').innerHTML = `
+      <div class="weather-banner">
+        🌤️ Live AI Zone Analysis • Weather: ${data.weather || 'N/A'} • Updated ${new Date().toLocaleTimeString()}
       </div>
     `;
-    container.appendChild(card);
-  });
 
-  updateMapMarkers(zones);
+    renderBestMove(zones[0]);
+
+    container.innerHTML = '';
+
+    zones.forEach((zone,index) => {
+      const card = document.createElement('div');
+
+      const actionClass = zone.action.replaceAll(' ','-').toLowerCase();
+      const safeZoneName = encodeURIComponent(zone.name);
+      const position = zoneLocations[zone.name];
+
+      const risk = zone.risk || 'LOW';
+      const riskClass = risk.toLowerCase();
+
+      card.className = `card risk-${riskClass}`;
+
+      const insightsHTML = Array.isArray(zone.insights) && zone.insights.length
+        ? `
+          <div class="ai-insights">
+            ${zone.insights.slice(0,4).map(item => `<div class="insight-pill">${item}</div>`).join('')}
+          </div>
+        `
+        : `
+          <div class="ai-insights">
+            <div class="insight-pill">🤖 AI calculated zone score</div>
+          </div>
+        `;
+
+      card.innerHTML = `
+        ${index === 0 ? `<div class="top-badge">🔥 BEST AREA NOW</div>` : ''}
+
+        <div class="zone-card-top">
+          <div>
+            <div class="zone-name">${zone.name}</div>
+            <div class="risk-label ${riskClass}">${risk} RISK</div>
+          </div>
+          <div class="score">${zone.score}</div>
+        </div>
+
+        <div class="action ${actionClass}">${zone.action}</div>
+
+        ${insightsHTML}
+
+        <button class="map-btn" onclick="focusZoneEncoded('${safeZoneName}')">
+          📍 View on Map
+        </button>
+
+        ${
+          position
+            ? `<button class="map-btn nav-btn" onclick="window.location.href='https://www.google.com/maps/dir/?api=1&destination=${position.lat},${position.lng}&travelmode=driving'">🧭 Nav</button>`
+            : ''
+        }
+
+        <div class="recommendation">
+          Est. $/hr: $${zone.estimatedHourly}<br>
+          Efficiency: ${zone.efficiency}%<br>
+          Drive: ${zone.driveTime || 'N/A'} • ${zone.distance || 'N/A'}<br>
+          Traffic: ${zone.traffic} • Saturation: ${zone.driverSaturation}
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+
+    updateMapMarkers(zones);
+
+  }catch(error){
+    console.error(error);
+
+    document.getElementById('weather').innerHTML = `
+      <div class="weather-banner">
+        ⚠️ Could not load live AI zones
+      </div>
+    `;
+
+    container.innerHTML = `
+      <div class="card">
+        <div class="zone-name">AI Zones Error</div>
+        <div class="recommendation">${error.message}</div>
+      </div>
+    `;
+  }
 }
 
 function useMyLocation(){
