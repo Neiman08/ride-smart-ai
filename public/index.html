@@ -416,18 +416,31 @@ function focusZone(zoneName){
 
 function navigateToZone(zoneName){
   const position = zoneLocations[zoneName];
-  if(!position) return;
 
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${position.lat},${position.lng}&travelmode=driving`;
-  window.open(url, '_blank');
+  if(!position){
+    console.log('ZONE NOT FOUND:', zoneName);
+    return;
+  }
+
+  const destination = encodeURIComponent(
+    `${position.lat},${position.lng}`
+  );
+
+  const googleMapsUrl =
+    `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+
+  // iPhone fix
+  window.location.href = googleMapsUrl;
 }
 
 function focusZoneEncoded(encodedName){
-  focusZone(decodeURIComponent(encodedName));
+  const decoded = decodeURIComponent(encodedName);
+  focusZone(decoded);
 }
 
 function navigateToZoneEncoded(encodedName){
-  navigateToZone(decodeURIComponent(encodedName));
+  const decoded = decodeURIComponent(encodedName);
+  navigateToZone(decoded);
 }
 
 function speakDecision(text){
@@ -859,4 +872,3 @@ window.initRideSmart = async function(){
 
 </body>
 </html>
-
