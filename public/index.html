@@ -438,14 +438,14 @@ body{
 }
 
 .airport-icon{
-  width:64px;
-  height:64px;
+  width:50px;
+  height:50px;
   background:#3b82f6;
-  border-radius:16px;
+  border-radius:14px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:32px;
+  font-size:24px;
 }
 
 .arrival-header{
@@ -455,17 +455,26 @@ body{
   margin-bottom:20px;
 }
 
-.arrival-header h2{font-size:24px;font-weight:900}
-.arrival-header span{color:#9ca3af;font-weight:700}
+.arrival-header h2{
+  font-size:24px;
+  font-weight:900;
+}
+
+.arrival-header span{
+  color:#9ca3af;
+  font-weight:800;
+}
 
 .demand-alert{
-  background:rgba(59,130,246,.2);
-  border:1px solid #3b82f6;
+  background:rgba(16,185,129,.18);
+  border:1px solid #10b981;
+  color:#34d399;
   padding:18px;
   border-radius:18px;
-  color:#93c5fd;
-  font-weight:700;
-  margin-bottom:24px;
+  font-size:18px;
+  font-weight:900;
+  line-height:1.5;
+  margin-bottom:22px;
 }
 
 .flights-list{
@@ -474,25 +483,39 @@ body{
 }
 
 .flight-card{
-  background:#111;
-  border:1px solid rgba(255,255,255,.08);
+  background:#111827;
+  border:1px solid rgba(255,255,255,.10);
   border-radius:20px;
-  padding:20px;
+  padding:18px;
   display:grid;
   grid-template-columns:auto 1fr auto;
-  align-items:center;
   gap:16px;
+  align-items:center;
 }
 
-.flight-time{font-size:22px;font-weight:900}
-.flight-info{font-size:16px;color:#9ca3af}
-.flight-status{
-  padding:8px 12px;
-  border-radius:10px;
+.flight-time{
+  font-size:22px;
   font-weight:900;
+}
+
+.flight-main{
+  font-size:18px;
+  font-weight:900;
+}
+
+.flight-sub{
+  color:#9ca3af;
+  margin-top:4px;
   font-size:14px;
+}
+
+.flight-status{
   background:#064e3b;
-  color:#10b981;
+  color:#34d399;
+  padding:8px 12px;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:900;
 }
 
 @media(max-width:520px){
@@ -556,6 +579,12 @@ body{
   <div id="orderResult"></div>
 </div>
 
+<button id="locationBtn">📍 Use My Location</button>
+
+<div id="map"></div>
+
+<div class="grid" id="zones"></div>
+
 <section class="airport-screen">
   <div class="app-header">
     <div></div>
@@ -618,13 +647,135 @@ const zoneLocations = {
 };
 
 function initMap(){
-  // Note: Map is initialized for data reference, though div is removed per instructions.
+  const mapDiv = document.getElementById('map');
+  if(!mapDiv) return;
+  map = new google.maps.Map(mapDiv, {
+    center:{ lat:41.8781, lng:-87.6298 },
+    zoom:10,
+    styles:[
+      { elementType:"geometry", stylers:[{ color:"#111111" }] },
+      { elementType:"labels.text.stroke", stylers:[{ color:"#111111" }] },
+      { elementType:"labels.text.fill", stylers:[{ color:"#ffffff" }] },
+      { featureType:"road", elementType:"geometry", stylers:[{ color:"#2a2a2a" }] },
+      { featureType:"water", elementType:"geometry", stylers:[{ color:"#0b1b2b" }] }
+    ]
+  });
 }
 
 function getZoneColor(score){
   if(score >= 65) return '#00ff88';
   if(score >= 50) return '#facc15';
   return '#ef4444';
+}
+
+function updateMapMarkers(zones){
+  if(!map) return;
+  markers.forEach(marker => marker.setMap(null));
+  markers = [];
+  markerByZone = {};
+  infoByZone = {};
+
+  zones.forEach(zone => {
+    const position = zoneLocations[zone.name];
+    if(!position) return;
+
+    const marker = new google.maps.Marker({
+      position,
+      map,
+      title:`${zone.name} - Score ${zone.score}`,
+      label:{
+        text:String(zone.score),
+        color:'#000',
+        fontWeight:'900',
+        fontSize:'14px'
+      },
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        fillColor:getZoneColor(zone.score),
+        fillOpacity:1,
+        strokeColor:'#ffffff',
+        strokeWeight:2,
+        scale:14
+      }
+    });
+
+    const info = new google.maps.InfoWindow({
+      content:`
+        <div style="color:#111;font-family:Arial;min-width:190px;">
+          <strong>${zone.name}</strong><br>
+          Score: ${zone.score}<br>
+          Action: ${zone.action}<br>
+          Est. $/hour: $${zone.estimatedHourly}<br>
+          Drive Time: ${zone.driveTime || 'N/A'}<br>
+          Distance: ${zone.distance || 'N/A'}<br>
+          Traffic: ${zone.traffic}<br>
+          Efficiency: ${zone.efficiency}
+        </div>
+      `
+    });
+
+    marker.addListener('click', () => info.open(map, marker));
+
+    markerByZone[zone.name] = marker;
+    infoByZone[zone.name] = info;
+    markers.push(marker);
+  });
+}
+
+function focusZone(zoneName){
+  const position = zoneLocations[zoneName];
+  const marker = markerByZone[zoneName];
+  const info = infoByZone[zoneName];
+
+  if(!position || !marker || !map) return;
+
+  map.setCenter(position);
+  map.setZoom(13);
+
+  if(info) info.open(map, marker);
+
+  window.scrollTo({
+    top:document.getElementById('map').offsetTop - 20,
+    behavior:'smooth'
+  });
+}
+
+function navigateToZone(zoneName){
+  const position = zoneLocations[zoneName];
+
+  if(!position){
+    console.log('ZONE NOT FOUND:', zoneName);
+    return;
+  }
+
+  const destination = encodeURIComponent(
+    `${position.lat},${position.lng}`
+  );
+
+  const googleMapsUrl =
+    `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+
+  window.location.href = googleMapsUrl;
+}
+
+function focusZoneEncoded(encodedName){
+  const decoded = decodeURIComponent(encodedName);
+  focusZone(decoded);
+}
+
+function navigateToZoneEncoded(encodedName){
+  const decoded = decodeURIComponent(encodedName);
+  navigateToZone(decoded);
+}
+
+function speakDecision(text){
+  if(!('speechSynthesis' in window)) return;
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = 'en-US';
+  msg.rate = 1;
+  msg.pitch = 1;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(msg);
 }
 
 function renderBestMove(bestMove){
@@ -634,6 +785,9 @@ function renderBestMove(bestMove){
     container.innerHTML = '';
     return;
   }
+
+  const safeBestMoveName = encodeURIComponent(bestMove.name);
+  const bestPosition = zoneLocations[bestMove.name];
 
   container.innerHTML = `
     <div class="best-move">
@@ -662,12 +816,21 @@ function renderBestMove(bestMove){
           <div class="best-move-stat-value">$${bestMove.estimatedHourly}</div>
         </div>
       </div>
+
+      <button class="map-btn" onclick="focusZoneEncoded('${safeBestMoveName}')">
+        📍 View on Map
+      </button>
+
+      <button class="map-btn nav-btn" onclick="window.location.href='https://www.google.com/maps/dir/?api=1&destination=${bestPosition.lat},${bestPosition.lng}&travelmode=driving'">
+        🧭 Go with Google Maps
+      </button>
     </div>
   `;
 }
 
 function evaluatePassengerRating(rating){
   if(!rating) return { label:'Unknown rating', tipScore:0, riskScore:-3 };
+
   if(rating >= 4.95) return { label:'Excellent passenger / high tip chance', tipScore:10, riskScore:0 };
   if(rating >= 4.85) return { label:'Good passenger / decent tip chance', tipScore:6, riskScore:0 };
   if(rating >= 4.75) return { label:'Average passenger / normal risk', tipScore:2, riskScore:-3 };
@@ -683,6 +846,7 @@ function checkOrderFromOCR(parsed){
   const tripMiles = parsed.tripMiles || 0;
 
   const result = document.getElementById('orderResult');
+
   if(!pay){
     result.innerHTML = `<div class="order-result bad">Could not detect pay from screenshot.</div>`;
     return;
@@ -693,9 +857,11 @@ function checkOrderFromOCR(parsed){
   const dollarsPerMile = pay / totalMiles;
   const hourlyRate = pay / (totalMinutes / 60);
   const dollarsPerMinute = pay / totalMinutes;
+
   const passenger = evaluatePassengerRating(rating);
 
   let baseScore = 50;
+
   if(hourlyRate >= 35) baseScore += 22;
   else if(hourlyRate >= 30) baseScore += 16;
   else if(hourlyRate >= 25) baseScore += 8;
@@ -711,6 +877,12 @@ function checkOrderFromOCR(parsed){
   else if(pickupMinutes >= 15) baseScore -= 8;
   else if(pickupMinutes <= 6) baseScore += 6;
 
+  if(pickupMiles >= 10) baseScore -= 12;
+  else if(pickupMiles >= 7) baseScore -= 8;
+
+  if(totalMinutes >= 60) baseScore -= 15;
+  else if(totalMinutes >= 45) baseScore -= 8;
+
   baseScore += passenger.tipScore;
   baseScore += passenger.riskScore;
 
@@ -720,21 +892,27 @@ function checkOrderFromOCR(parsed){
   let visualClass = 'reject';
   let visualTitle = 'RECHAZA';
   let visualIcon = '×';
+  let voice = 'Bad order. Reject it.';
 
   if(baseScore >= 72){
     visualClass = 'accept';
     visualTitle = 'ACEPTA';
     visualIcon = '✓';
+    voice = 'Good order. Take it.';
   }
   else if(baseScore >= 55){
     visualClass = 'wait';
     visualTitle = 'ESPERA';
     visualIcon = '!';
+    voice = 'Regular order. Be careful.';
   }
 
   const reasons = [];
   if(hourlyRate < 25) reasons.push(`$${hourlyRate.toFixed(2)}/hr < mínimo $25.00/hr`);
   if(totalMinutes > 20) reasons.push(`${totalMinutes.toFixed(0)} min totales > máximo 20 min`);
+  if(totalMiles > 10) reasons.push(`${totalMiles.toFixed(1)} mi totales > máximo 10.0 mi`);
+  if(pickupMiles > 7) reasons.push(`${pickupMiles.toFixed(1)} mi pickup muy lejos`);
+  if(rating && rating >= 4.90) reasons.push(`Pasajero ${rating.toFixed(2)} ⭐: alta posibilidad de tip`);
   if(reasons.length === 0) reasons.push("Parámetros dentro de rangos óptimos.");
 
   result.innerHTML = `
@@ -749,20 +927,30 @@ function checkOrderFromOCR(parsed){
         </div>
         <div class="premium-pay">$${pay.toFixed(2)}</div>
       </div>
+
       <div class="metric-pills">
         <div class="metric-pill">$${dollarsPerMile.toFixed(2)} <span>/mi</span></div>
         <div class="metric-pill">$${hourlyRate.toFixed(2)} <span>/hr</span></div>
         <div class="metric-pill">$${dollarsPerMinute.toFixed(3)} <span>/min</span></div>
       </div>
+
       <div class="trip-row">
         <div>➤ ${tripMiles.toFixed(1)} mi viaje</div>
         <div>📍 ${pickupMiles.toFixed(1)} mi pickup</div>
         <div>⏳ ${totalMinutes.toFixed(0)} min</div>
       </div>
-      <div class="reason-box">${reasons.map(r => `• ${r}`).join('<br>')}</div>
-      <button class="earnings-btn" onclick="addToEarnings(${pay.toFixed(2)})">＋ Agregar a Ganancias</button>
+
+      <div class="reason-box">
+        ${reasons.map(r => `• ${r}`).join('<br>')}
+      </div>
+
+      <button class="earnings-btn" onclick="addToEarnings(${pay.toFixed(2)})">
+        ＋ Agregar a Ganancias
+      </button>
     </div>
   `;
+
+  speakDecision(voice);
 }
 
 function addToEarnings(amount){
@@ -777,19 +965,87 @@ function addToEarnings(amount){
 async function loadZones(){
   const zones = Object.keys(zoneLocations).map(name => {
     const randomScore = Math.floor(Math.random() * 65) + 35;
+    let action = 'AVOID';
+    if(randomScore >= 65) action = 'GO NOW';
+    else if(randomScore >= 50) action = 'WAIT NEARBY';
+
     return {
       name,
       score: randomScore,
-      action: randomScore >= 65 ? 'GO NOW' : (randomScore >= 50 ? 'WAIT NEARBY' : 'AVOID'),
+      action,
       estimatedHourly: (Math.random() * 15 + 25).toFixed(2),
       driveTime: Math.floor(Math.random() * 30) + ' min',
       distance: (Math.random() * 15).toFixed(1) + ' mi',
+      traffic: 'Moderate',
+      driverSaturation: 'Low',
       efficiency: (Math.random() * 20 + 70).toFixed(0) + '%'
     };
   });
+
   zones.sort((a,b) => b.score - a.score);
-  document.getElementById('weather').innerHTML = `<div class="weather-banner">🌤️ Live AI Zone Analysis • ${new Date().toLocaleTimeString()}</div>`;
+  
+  document.getElementById('weather').innerHTML = `
+    <div class="weather-banner">
+      🌤️ Live AI Zone Analysis • Updated ${new Date().toLocaleTimeString()}
+    </div>
+  `;
+
   renderBestMove(zones[0]);
+
+  const container = document.getElementById('zones');
+  if(!container) return;
+  container.innerHTML = '';
+
+  zones.forEach((zone,index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const actionClass = zone.action.replaceAll(' ','-').toLowerCase();
+    const safeZoneName = encodeURIComponent(zone.name);
+    const position = zoneLocations[zone.name];
+
+    card.innerHTML = `
+      ${index === 0 ? `<div class="top-badge">🔥 BEST AREA NOW</div>` : ''}
+      <div class="zone-name">${zone.name}</div>
+      <div class="score">${zone.score}</div>
+      <div class="action ${actionClass}">${zone.action}</div>
+      <button class="map-btn" onclick="focusZoneEncoded('${safeZoneName}')">📍 View on Map</button>
+      <button class="map-btn nav-btn" onclick="window.location.href='https://www.google.com/maps/dir/?api=1&destination=${position.lat},${position.lng}&travelmode=driving'">🧭 Nav</button>
+      <div class="recommendation">
+        Est. $/hr: $${zone.estimatedHourly}<br>
+        Efficiency: ${zone.efficiency}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  updateMapMarkers(zones);
+}
+
+function useMyLocation(){
+  if(!navigator.geolocation) return;
+  const btn = document.getElementById('locationBtn');
+  if(!btn) return;
+  btn.disabled = true;
+  btn.innerText = '⌛ Locating...';
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      currentUserLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+      if(map){
+        map.setCenter(currentUserLocation);
+        if(userMarker) userMarker.setMap(null);
+        userMarker = new google.maps.Marker({
+          position: currentUserLocation,
+          map,
+          icon:{ path:google.maps.SymbolPath.CIRCLE, fillColor:'#3b82f6', fillOpacity:1, strokeColor:'#ffffff', strokeWeight:3, scale:10 }
+        });
+      }
+      await loadZones();
+      btn.disabled = false;
+      btn.innerText = '📍 Use My Location';
+    },
+    () => { btn.disabled = false; btn.innerText = '📍 Use My Location'; }
+  );
 }
 
 function parseUberText(text){
@@ -797,20 +1053,25 @@ function parseUberText(text){
   const payMatch = clean.match(/\$ ?(\d+(\.\d{1,2})?)/);
   const ratingMatch = clean.match(/(?:★|⭐|\*)?\s*(4\.\d{1,2})/);
   const segments = [...clean.matchAll(/(\d+)\s*(?:hr|h)?\s*(\d+)?\s*min\s*\(?\s*(\d+(\.\d+)?)\s*mi\s*\)?/gi)];
+
   let pickupMinutes = 0, pickupMiles = 0, tripMinutes = 0, tripMiles = 0;
+
   if(segments.length >= 1){
     const s = segments[0];
     const hr = s[1] && clean.slice(s.index, s.index + 20).toLowerCase().includes('hr') ? parseFloat(s[1]) : 0;
-    pickupMinutes = (hr * 60) + (hr ? parseFloat(s[2] || 0) : parseFloat(s[1] || 0));
+    const min = hr ? parseFloat(s[2] || 0) : parseFloat(s[1] || 0);
+    pickupMinutes = (hr * 60) + min;
     pickupMiles = parseFloat(s[3]);
   }
   if(segments.length >= 2){
     const s = segments[1];
     const part = clean.slice(s.index, s.index + 25).toLowerCase();
     const hr = (part.includes('hr') || part.includes('h ')) ? parseFloat(s[1]) : 0;
-    tripMinutes = (hr * 60) + (hr ? parseFloat(s[2] || 0) : parseFloat(s[1] || 0));
+    const min = hr ? parseFloat(s[2] || 0) : parseFloat(s[1] || 0);
+    tripMinutes = (hr * 60) + min;
     tripMiles = parseFloat(s[3]);
   }
+
   return { pay: payMatch ? parseFloat(payMatch[1]) : null, rating: ratingMatch ? parseFloat(ratingMatch[1]) : null, pickupMinutes, pickupMiles, tripMinutes, tripMiles };
 }
 
@@ -819,6 +1080,7 @@ document.getElementById('uberScreenshot').addEventListener('change', async funct
   if(!file) return;
   const status = document.getElementById('ocrStatus');
   status.innerHTML = `<div class="order-result medium">Reading Uber order...</div>`;
+
   try{
     const result = await Tesseract.recognize(file, 'eng');
     const parsed = parseUberText(result.data.text);
@@ -829,52 +1091,88 @@ document.getElementById('uberScreenshot').addEventListener('change', async funct
   }
 });
 
-// Mock Airport Logic
-const airports = [
-  { code: 'ORD', name: "O'Hare Intl", dist: '12 mi' },
-  { code: 'MDW', name: 'Midway Intl', dist: '8 mi' }
-];
+const airportsData = {
+  ORD: {
+    name: "O'Hare Intl",
+    city: "Chicago",
+    distance: "22.1 km",
+    demand: "🔥 ALTA DEMANDA: 20 vuelos llegando pronto. Posiciónate cerca.",
+    flights: [
+      { time:"10:54 PM", code:"LXJ 538", airline:"Flexjet", from:"LAS", city:"Las Vegas", pax:"~193 pasajeros", status:"Arrived" },
+      { time:"10:55 PM", code:"WN 2953", airline:"Southwest", from:"LAS", city:"Las Vegas", pax:"~151 pasajeros", status:"Arrived" },
+      { time:"10:57 PM", code:"AA 2194", airline:"American", from:"MIA", city:"Miami", pax:"~151 pasajeros", status:"Arrived" }
+    ]
+  },
+  MDW: {
+    name: "Midway Intl",
+    city: "Chicago",
+    distance: "18.4 km",
+    demand: "⚡ DEMANDA MEDIA: vuelos activos, buena zona si estás cerca.",
+    flights: [
+      { time:"11:05 PM", code:"WN 448", airline:"Southwest", from:"ATL", city:"Atlanta", pax:"~143 pasajeros", status:"Arrived" },
+      { time:"11:12 PM", code:"WN 781", airline:"Southwest", from:"DEN", city:"Denver", pax:"~138 pasajeros", status:"Arrived" }
+    ]
+  }
+};
 
-function loadAirports(){
-  const tabContainer = document.getElementById('airportTabs');
-  const selectedContainer = document.getElementById('selectedAirport');
-  const flightsList = document.getElementById('flightsList');
-  
-  tabContainer.innerHTML = airports.map((a, i) => `
-    <div class="airport-tab ${i === 0 ? 'active' : ''}">
-      <div class="airport-code">${a.code}</div>
-      <div class="airport-name-small">${a.name}</div>
-      <div class="airport-distance">${a.dist}</div>
+function loadAirports(activeCode = "ORD"){
+  const tabs = document.getElementById("airportTabs");
+  const selected = document.getElementById("selectedAirport");
+  const count = document.getElementById("flightCount");
+  const alertBox = document.getElementById("demandAlert");
+  const list = document.getElementById("flightsList");
+
+  if(!tabs || !selected || !count || !alertBox || !list) return;
+
+  tabs.innerHTML = Object.entries(airportsData).map(([code, airport]) => `
+    <div class="airport-tab ${code === activeCode ? 'active' : ''}" onclick="loadAirports('${code}')">
+      <div class="airport-code">${code}</div>
+      <div class="airport-name-small">${airport.name}</div>
+      <div class="airport-distance">📍 ${airport.distance}</div>
     </div>
-  `).join('');
+  `).join("");
 
-  selectedContainer.innerHTML = `
+  const airport = airportsData[activeCode];
+
+  selected.innerHTML = `
     <div class="airport-icon">✈️</div>
     <div>
-      <div style="font-size:24px;font-weight:900">${airports[0].name}</div>
-      <div style="color:#9ca3af;font-size:16px">Centro de operaciones principal</div>
+      <div style="font-size:24px;font-weight:900">${airport.name}</div>
+      <div style="color:#9ca3af;font-size:16px">${airport.city} • ${activeCode}</div>
+      <div style="color:#10b981;font-size:16px;font-weight:900;margin-top:4px">${airport.distance} de tu ubicación</div>
     </div>
   `;
 
-  document.getElementById('flightCount').innerText = '12 vuelos';
-  document.getElementById('demandAlert').innerText = '🚀 ALTA DEMANDA: Se esperan más de 400 pasajeros en la próxima hora.';
+  count.innerText = `${airport.flights.length} vuelos`;
+  alertBox.innerText = airport.demand;
 
-  flightsList.innerHTML = [1,2,3].map(() => `
+  list.innerHTML = airport.flights.map(flight => `
     <div class="flight-card">
-      <div class="flight-time">14:45</div>
-      <div class="flight-info">
-        <div style="font-weight:800;color:white">AA 2341 • Miami</div>
-        <div style="font-size:14px">Terminal 3 • Puerta K12</div>
+      <div class="flight-time">${flight.time}</div>
+      <div>
+        <div class="flight-main">✈️ ${flight.code}</div>
+        <div class="flight-sub">${flight.airline}</div>
+        <div class="flight-sub">Desde ${flight.from} • ${flight.city}</div>
+        <div style="color:#10b981;font-weight:900;margin-top:8px">👥 ${flight.pax}</div>
       </div>
-      <div class="flight-status">A tiempo</div>
+      <div class="flight-status">${flight.status}</div>
     </div>
-  `).join('');
+  `).join("");
 }
 
-window.onload = async function(){
+window.initRideSmart = async function(){
+  initMap();
   await loadZones();
   loadAirports();
+  const locBtn = document.getElementById('locationBtn');
+  if(locBtn) locBtn.addEventListener('click', useMyLocation);
 };
+</script>
+
+<script
+  async
+  defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFLgcI2Wyji8NZmakQ4w7VtoL6o63ikeg&callback=initRideSmart">
 </script>
 
 </body>
