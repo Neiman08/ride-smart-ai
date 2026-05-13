@@ -1164,9 +1164,10 @@ async function loadAirports(activeCode = "KORD"){
     list.innerHTML = data.arrivals.map(flight => {
 
       const localTime = flight.arrivalTime
-        ? new Date(flight.arrivalTime).toLocaleTimeString([], {
-            hour:'2-digit',
-            minute:'2-digit'
+        ? new Date(flight.arrivalTime).toLocaleTimeString('en-US', {
+            timeZone: 'America/Chicago',
+            hour: '2-digit',
+            minute: '2-digit'
           })
         : 'N/A';
 
