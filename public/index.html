@@ -710,6 +710,7 @@ function checkOrderFromOCR(parsed){
   const pickupMiles = parsed.pickupMiles || 0;
   const tripMinutes = parsed.tripMinutes || 0;
   const tripMiles = parsed.tripMiles || 0;
+  const detectedDestination = parsed.detectedDestination;
 
   const result = document.getElementById('orderResult');
 
@@ -752,6 +753,25 @@ function checkOrderFromOCR(parsed){
   baseScore += passenger.tipScore;
   baseScore += passenger.riskScore;
 
+  if(detectedDestination){
+    if(
+      detectedDestination === "O'Hare Airport" ||
+      detectedDestination === "Midway Airport" ||
+      detectedDestination === "Downtown Chicago" ||
+      detectedDestination === "Rosemont"
+    ){
+      baseScore += 10;
+    }
+
+    if(
+      detectedDestination === "Tinley Park" ||
+      detectedDestination === "Bolingbrook" ||
+      detectedDestination === "Wheaton"
+    ){
+      baseScore -= 6;
+    }
+  }
+
   if(baseScore > 100) baseScore = 100;
   if(baseScore < 0) baseScore = 0;
 
@@ -779,6 +799,9 @@ function checkOrderFromOCR(parsed){
   if(totalMiles > 10) reasons.push(`${totalMiles.toFixed(1)} mi totales > máximo 10.0 mi`);
   if(pickupMiles > 7) reasons.push(`${pickupMiles.toFixed(1)} mi pickup muy lejos`);
   if(rating && rating >= 4.90) reasons.push(`Pasajero ${rating.toFixed(2)} ⭐: alta posibilidad de tip`);
+  if(detectedDestination){
+    reasons.push(`Destino detectado: ${detectedDestination}`);
+  }
   if(reasons.length === 0) reasons.push("Parámetros dentro de rangos óptimos.");
 
   result.innerHTML = `
@@ -801,7 +824,7 @@ function checkOrderFromOCR(parsed){
       </div>
 
       <div class="trip-row">
-        <div>➤ ${tripMiles.toFixed(1)} mi viaje</div>
+        <div>➤ ${tripMiles.toFixed(1)} mi viaje ${detectedDestination ? `to ${detectedDestination}` : ''}</div>
         <div>📍 ${pickupMiles.toFixed(1)} mi pickup</div>
         <div>⏳ ${totalMinutes.toFixed(0)} min</div>
       </div>
@@ -991,6 +1014,48 @@ function parseUberText(text){
     .replace(/\s+/g,' ')
     .replace(/,/g,'.');
 
+  const destinationZones = [
+    "O'Hare Airport",
+    "Midway Airport",
+    "Downtown Chicago",
+    "Rosemont",
+    "Evanston",
+    "Oak Park",
+    "Naperville",
+    "Des Plaines",
+    "Skokie",
+    "Arlington Heights",
+    "Schaumburg",
+    "Cicero",
+    "Glenview",
+    "Elmhurst",
+    "Downers Grove",
+    "La Grange",
+    "Wheaton",
+    "Wilmette",
+    "Park Ridge",
+    "Berwyn",
+    "Tinley Park",
+    "Bolingbrook",
+    "Northbrook"
+  ];
+
+  let detectedDestination = null;
+
+  for(const zone of destinationZones){
+    const simpleZone = zone
+      .replace("O'Hare Airport", "O'Hare")
+      .replace("Midway Airport", "Midway");
+
+    if(
+      clean.toLowerCase().includes(zone.toLowerCase()) ||
+      clean.toLowerCase().includes(simpleZone.toLowerCase())
+    ){
+      detectedDestination = zone;
+      break;
+    }
+  }
+
   console.log('OCR TEXT:', clean);
 
   // PAY
@@ -1089,7 +1154,8 @@ function parseUberText(text){
     pickupMinutes,
     pickupMiles,
     tripMinutes,
-    tripMiles
+    tripMiles,
+    detectedDestination
   };
 }
 
