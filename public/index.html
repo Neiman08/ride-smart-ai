@@ -81,24 +81,6 @@ body{
 
 .order-checker h2{font-size:20px;margin-bottom:12px}
 
-.order-inputs{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:10px;
-}
-
-.order-inputs input{
-  width:100%;
-  padding:16px;
-  border:none;
-  outline:none;
-  border-radius:14px;
-  background:#fff;
-  color:#000;
-  font-size:18px;
-  font-weight:900;
-}
-
 .check-btn{
   width:100%;
   margin-top:12px;
@@ -124,25 +106,6 @@ body{
 .good{background:#00ff88;color:#000}
 .medium{background:#facc15;color:#000}
 .bad{background:#ef4444;color:#fff}
-
-.ai-breakdown{
-  margin-top:14px;
-  background:#181818;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:18px;
-  padding:16px;
-  color:#ddd;
-  line-height:1.7;
-  font-size:15px;
-}
-
-.ai-breakdown strong{color:#fff}
-
-.big-decision{
-  font-size:28px;
-  font-weight:900;
-  margin-bottom:10px;
-}
 
 #locationBtn{
   width:100%;
@@ -354,7 +317,6 @@ body{
   cursor:pointer;
 }
 
-/* --- NUEVOS CAMBIOS DE INTEGRACIÓN PREMIUM --- */
 .premium-header{
   display:grid !important;
   grid-template-columns:1fr auto;
@@ -417,8 +379,6 @@ body{
   .subtitle{font-size:16px}
   #map{height:600px}
   .grid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
-  .best-move-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
-  .order-inputs{grid-template-columns:repeat(6,1fr)}
 }
 </style>
 </head>
@@ -433,17 +393,6 @@ body{
 
 <div class="order-checker">
   <h2>📦 Uber Order Checker</h2>
-
-  <div class="order-inputs">
-    <input id="orderPay" type="number" inputmode="decimal" placeholder="Pay $" />
-    <input id="passengerRating" type="number" inputmode="decimal" placeholder="Rating" />
-    <input id="pickupMinutes" type="number" inputmode="decimal" placeholder="Pickup Min" />
-    <input id="pickupMiles" type="number" inputmode="decimal" placeholder="Pickup Mi" />
-    <input id="tripMinutes" type="number" inputmode="decimal" placeholder="Trip Min" />
-    <input id="tripMiles" type="number" inputmode="decimal" placeholder="Trip Mi" />
-  </div>
-
-  <button onclick="checkOrder()" class="check-btn">Analyze Order</button>
 
   <input id="uberScreenshot" type="file" accept="image/*" hidden />
 
@@ -685,18 +634,18 @@ function evaluatePassengerRating(rating){
   return { label:'Low rating / higher risk', tipScore:-6, riskScore:-10 };
 }
 
-function checkOrder(){
-  const pay = parseFloat(document.getElementById('orderPay').value);
-  const rating = parseFloat(document.getElementById('passengerRating').value);
-  const pickupMinutes = parseFloat(document.getElementById('pickupMinutes').value) || 0;
-  const pickupMiles = parseFloat(document.getElementById('pickupMiles').value) || 0;
-  const tripMinutes = parseFloat(document.getElementById('tripMinutes').value) || 0;
-  const tripMiles = parseFloat(document.getElementById('tripMiles').value) || 0;
+function checkOrderFromOCR(parsed){
+  const pay = parsed.pay;
+  const rating = parsed.rating;
+  const pickupMinutes = parsed.pickupMinutes || 0;
+  const pickupMiles = parsed.pickupMiles || 0;
+  const tripMinutes = parsed.tripMinutes || 0;
+  const tripMiles = parsed.tripMiles || 0;
 
   const result = document.getElementById('orderResult');
 
-  if(!pay || (!pickupMinutes && !tripMinutes) || (!pickupMiles && !tripMiles)){
-    result.innerHTML = `<div class="order-result bad">Enter pay, pickup/trip miles and pickup/trip minutes</div>`;
+  if(!pay){
+    result.innerHTML = `<div class="order-result bad">Could not detect pay from screenshot.</div>`;
     return;
   }
 
@@ -737,7 +686,6 @@ function checkOrder(){
   if(baseScore > 100) baseScore = 100;
   if(baseScore < 0) baseScore = 0;
 
-  // Lógica Visual Premium
   let visualClass = 'reject';
   let visualTitle = 'RECHAZA';
   let visualIcon = '×';
@@ -758,13 +706,8 @@ function checkOrder(){
 
   const reasons = [];
   if(hourlyRate < 25) reasons.push(`$${hourlyRate.toFixed(2)}/hr < mínimo $25.00/hr`);
-  
-  if(totalMinutes > 20)
-    reasons.push(`${totalMinutes.toFixed(0)} min totales > máximo 20 min`);
-
-  if(totalMiles > 10)
-    reasons.push(`${totalMiles.toFixed(1)} mi totales > máximo 10.0 mi`);
-
+  if(totalMinutes > 20) reasons.push(`${totalMinutes.toFixed(0)} min totales > máximo 20 min`);
+  if(totalMiles > 10) reasons.push(`${totalMiles.toFixed(1)} mi totales > máximo 10.0 mi`);
   if(pickupMiles > 7) reasons.push(`${pickupMiles.toFixed(1)} mi pickup muy lejos`);
   if(rating && rating >= 4.90) reasons.push(`Pasajero ${rating.toFixed(2)} ⭐: alta posibilidad de tip`);
   if(reasons.length === 0) reasons.push("Parámetros dentro de rangos óptimos.");
@@ -810,12 +753,9 @@ function checkOrder(){
 function addToEarnings(amount){
   const today = new Date().toISOString().slice(0,10);
   const key = `rideSmartEarnings_${today}`;
-
   const current = parseFloat(localStorage.getItem(key) || '0');
   const updated = current + amount;
-
   localStorage.setItem(key, updated.toFixed(2));
-
   alert(`Ganancias de hoy: $${updated.toFixed(2)}`);
 }
 
@@ -937,15 +877,8 @@ document.getElementById('uberScreenshot').addEventListener('change', async funct
   try{
     const result = await Tesseract.recognize(file, 'eng');
     const parsed = parseUberText(result.data.text);
-    if(parsed.pay) document.getElementById('orderPay').value = parsed.pay;
-    if(parsed.rating) document.getElementById('passengerRating').value = parsed.rating;
-    if(parsed.pickupMinutes) document.getElementById('pickupMinutes').value = parsed.pickupMinutes;
-    if(parsed.pickupMiles) document.getElementById('pickupMiles').value = parsed.pickupMiles;
-    if(parsed.tripMinutes) document.getElementById('tripMinutes').value = parsed.tripMinutes;
-    if(parsed.tripMiles) document.getElementById('tripMiles').value = parsed.tripMiles;
-
     status.innerHTML = `<div class="order-result good">Screenshot read successfully.</div>`;
-    checkOrder();
+    checkOrderFromOCR(parsed);
   }catch(error){
     status.innerHTML = `<div class="order-result bad">Error reading screenshot.</div>`;
   }
