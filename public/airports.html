@@ -9,12 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
+*{margin:0;padding:0;box-sizing:border-box}
 
 body{
   font-family:'Inter',sans-serif;
@@ -44,10 +39,7 @@ body{
   margin-bottom:40px;
 }
 
-.app-title{
-  font-size:34px;
-  font-weight:900;
-}
+.app-title{font-size:34px;font-weight:900}
 
 .profile-dot{
   justify-self:end;
@@ -146,15 +138,8 @@ body{
   margin-bottom:20px;
 }
 
-.arrival-header h2{
-  font-size:24px;
-  font-weight:900;
-}
-
-.arrival-header span{
-  color:#9ca3af;
-  font-weight:800;
-}
+.arrival-header h2{font-size:24px;font-weight:900}
+.arrival-header span{color:#9ca3af;font-weight:800}
 
 .demand-alert{
   background:rgba(16,185,129,.18);
@@ -187,6 +172,7 @@ body{
 .flight-time{
   font-size:22px;
   font-weight:900;
+  white-space:nowrap;
 }
 
 .flight-main{
@@ -213,6 +199,7 @@ body{
   border-radius:12px;
   font-size:13px;
   font-weight:900;
+  width:max-content;
 }
 
 .loading-card{
@@ -224,56 +211,31 @@ body{
 }
 
 @media(max-width:520px){
-
-  .flight-card{
-    grid-template-columns:1fr;
-  }
-
-  .flight-status{
-    width:max-content;
-  }
-
-  .airport-title{
-    font-size:34px;
-  }
-
+  .flight-card{grid-template-columns:1fr}
+  .airport-title{font-size:34px}
 }
-
 </style>
 </head>
 
 <body>
 
 <a href="/">
-  <button class="back-btn">
-    ⬅️ Volver a Ride Smart AI
-  </button>
+  <button class="back-btn">⬅️ Volver a Ride Smart AI</button>
 </a>
 
 <div class="app-header">
-
   <div></div>
-
-  <div class="app-title">
-    Ride Smart
-  </div>
-
-  <div class="profile-dot">
-    R
-  </div>
-
+  <div class="app-title">Ride Smart</div>
+  <div class="profile-dot">R</div>
 </div>
 
-<h1 class="airport-title">
-  ✈️ Aeropuertos Cercanos
-</h1>
+<h1 class="airport-title">✈️ Aeropuertos Cercanos</h1>
 
 <p class="airport-subtitle">
   Llegadas reales • Demanda estimada • Pasajeros aproximados
 </p>
 
 <div class="airport-tabs" id="airportTabs"></div>
-
 <div class="selected-airport" id="selectedAirport"></div>
 
 <div class="arrival-header">
@@ -281,43 +243,73 @@ body{
   <span id="flightCount">0 vuelos</span>
 </div>
 
-<div class="demand-alert" id="demandAlert">
-  Cargando demanda...
-</div>
-
+<div class="demand-alert" id="demandAlert">Cargando demanda...</div>
 <div class="flights-list" id="flightsList"></div>
 
 <script>
-
 const airportMap = {
-
   KORD:{
     code:"ORD",
     name:"O'Hare Intl",
     city:"Chicago",
     distance:"22.1 km"
   },
-
   KMDW:{
     code:"MDW",
     name:"Midway Intl",
     city:"Chicago",
     distance:"18.4 km"
   }
-
 };
 
-function formatChicagoTime(timeString){
+const cityNames = {
+  ATL:"Atlanta",
+  AUS:"Austin",
+  BDL:"Hartford",
+  BNA:"Nashville",
+  BOS:"Boston",
+  CHS:"Charleston",
+  CMH:"Columbus",
+  DEN:"Denver",
+  DSM:"Des Moines",
+  DUB:"Dublin",
+  FNT:"Flint",
+  FWA:"Fort Wayne",
+  HSV:"Huntsville",
+  IAH:"Houston",
+  KEF:"Reykjavik",
+  LAS:"Las Vegas",
+  LAX:"Los Angeles",
+  LGA:"New York",
+  LHR:"London",
+  MIA:"Miami",
+  MKE:"Milwaukee",
+  ORF:"Norfolk",
+  PWM:"Portland",
+  RIC:"Richmond",
+  SEA:"Seattle",
+  TVC:"Traverse City",
+  YYZ:"Toronto"
+};
 
-  if(!timeString) return 'N/A';
+function parseFlightDate(timeString){
+  if(!timeString) return null;
 
-  const clean = timeString.replace(' ','T');
+  const clean = String(timeString)
+    .replace(' ', 'T')
+    .replace(/([+-]\d{2})(\d{2})$/, '$1:$2');
 
   const date = new Date(clean);
 
-  if(isNaN(date.getTime())){
-    return 'N/A';
-  }
+  if(isNaN(date.getTime())) return null;
+
+  return date;
+}
+
+function formatChicagoTime(timeString){
+  const date = parseFlightDate(timeString);
+
+  if(!date) return 'N/A';
 
   return date.toLocaleTimeString('en-US',{
     timeZone:'America/Chicago',
@@ -326,8 +318,27 @@ function formatChicagoTime(timeString){
   });
 }
 
-async function loadAirports(activeCode = 'KORD'){
+function normalizeStatus(status){
+  if(!status || status === 'Unknown') return 'Expected';
+  return status;
+}
 
+function estimatePassengers(flight){
+  if(flight.estimatedPassengers) return flight.estimatedPassengers;
+
+  const number = String(flight.flightNumber || '');
+
+  if(number.includes('UA')) return 150;
+  if(number.includes('AA')) return 150;
+  if(number.includes('DL')) return 145;
+  if(number.includes('WN')) return 150;
+  if(number.includes('BA')) return 220;
+  if(number.includes('AC')) return 140;
+
+  return 'N/A';
+}
+
+async function loadAirports(activeCode = 'KORD'){
   const tabs = document.getElementById('airportTabs');
   const selected = document.getElementById('selectedAirport');
   const count = document.getElementById('flightCount');
@@ -335,153 +346,105 @@ async function loadAirports(activeCode = 'KORD'){
   const list = document.getElementById('flightsList');
 
   tabs.innerHTML = Object.entries(airportMap).map(([icao,airport]) => `
-
-    <div
-      class="airport-tab ${icao === activeCode ? 'active' : ''}"
-      onclick="loadAirports('${icao}')"
-    >
-
-      <div class="airport-code">
-        ${airport.code}
-      </div>
-
-      <div class="airport-name-small">
-        ${airport.name}
-      </div>
-
-      <div class="airport-distance">
-        📍 ${airport.distance}
-      </div>
-
+    <div class="airport-tab ${icao === activeCode ? 'active' : ''}" onclick="loadAirports('${icao}')">
+      <div class="airport-code">${airport.code}</div>
+      <div class="airport-name-small">${airport.name}</div>
+      <div class="airport-distance">📍 ${airport.distance}</div>
     </div>
-
   `).join('');
 
   const airport = airportMap[activeCode];
 
   selected.innerHTML = `
-
-    <div class="airport-icon">
-      ✈️
-    </div>
-
+    <div class="airport-icon">✈️</div>
     <div>
-
-      <div style="font-size:24px;font-weight:900">
-        ${airport.name}
-      </div>
-
-      <div style="color:#9ca3af;font-size:16px">
-        ${airport.city} • ${airport.code}
-      </div>
-
+      <div style="font-size:24px;font-weight:900">${airport.name}</div>
+      <div style="color:#9ca3af;font-size:16px">${airport.city} • ${airport.code}</div>
       <div style="color:#10b981;font-size:16px;font-weight:900;margin-top:4px">
         ${airport.distance} de tu ubicación
       </div>
-
     </div>
-
   `;
 
   list.innerHTML = `
-    <div class="loading-card">
-      ⌛ Cargando vuelos reales...
-    </div>
+    <div class="loading-card">⌛ Cargando vuelos reales...</div>
   `;
 
   try{
-
-    const response = await fetch(
-      `/api/airports/arrivals/${activeCode}`
-    );
-
+    const response = await fetch(`/api/airports/arrivals/${activeCode}?t=${Date.now()}`);
     const data = await response.json();
 
     if(!data.success){
       throw new Error('Airport API Error');
     }
 
-    count.innerText = `${data.total} vuelos`;
+    const now = new Date();
+    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
-    const totalPassengers = data.arrivals.reduce((sum,flight) => {
-      return sum + (flight.estimatedPassengers || 0);
+    let arrivals = Array.isArray(data.arrivals) ? data.arrivals : [];
+
+    arrivals = arrivals
+      .map(flight => ({
+        ...flight,
+        parsedDate: parseFlightDate(flight.arrivalTime)
+      }))
+      .filter(flight => flight.parsedDate)
+      .filter(flight => flight.parsedDate >= thirtyMinutesAgo)
+      .sort((a,b) => a.parsedDate - b.parsedDate)
+      .slice(0,20);
+
+    count.innerText = `${arrivals.length} vuelos`;
+
+    const totalPassengers = arrivals.reduce((sum,flight) => {
+      const pax = estimatePassengers(flight);
+      return sum + (typeof pax === 'number' ? pax : 0);
     },0);
 
     alertBox.innerText =
-      `🔥 ALTA DEMANDA: ${data.total} vuelos próximos • aprox. ${totalPassengers} pasajeros llegando`;
+      arrivals.length
+        ? `🔥 ALTA DEMANDA: ${arrivals.length} vuelos próximos • aprox. ${totalPassengers} pasajeros llegando`
+        : 'No hay vuelos próximos en este momento.';
 
-    if(!data.arrivals.length){
-
+    if(!arrivals.length){
       list.innerHTML = `
-        <div class="loading-card">
-          No hay vuelos próximos
-        </div>
+        <div class="loading-card">No hay vuelos próximos</div>
       `;
-
       return;
     }
 
-    list.innerHTML = data.arrivals.map(flight => {
+    list.innerHTML = arrivals.map(flight => {
+      const localTime = formatChicagoTime(flight.arrivalTime);
+      const city = flight.city && flight.city !== 'Unknown'
+        ? flight.city
+        : (cityNames[flight.from] || 'Unknown');
 
-      const localTime = formatChicagoTime(
-        flight.arrivalTime
-      );
+      const pax = estimatePassengers(flight);
 
       return `
-
         <div class="flight-card">
-
-          <div class="flight-time">
-            ${localTime}
-          </div>
+          <div class="flight-time">${localTime}</div>
 
           <div>
-
-            <div class="flight-main">
-              ✈️ ${flight.flightNumber}
-            </div>
-
-            <div class="flight-sub">
-              ${flight.airline}
-            </div>
-
-            <div class="flight-sub">
-              Desde ${flight.from} • ${flight.city}
-            </div>
-
-            <div class="flight-sub">
-              🛬 Terminal ${flight.terminal || 'N/A'}
-            </div>
-
-            <div class="flight-pax">
-              👥 ${flight.estimatedPassengers || 'N/A'} pasajeros aprox.
-            </div>
-
+            <div class="flight-main">✈️ ${flight.flightNumber}</div>
+            <div class="flight-sub">${flight.airline}</div>
+            <div class="flight-sub">Desde ${flight.from} • ${city}</div>
+            <div class="flight-sub">🛬 Terminal ${flight.terminal || 'N/A'}</div>
+            <div class="flight-pax">👥 ${pax} pasajeros aprox.</div>
           </div>
 
-          <div class="flight-status">
-            ${flight.status}
-          </div>
-
+          <div class="flight-status">${normalizeStatus(flight.status)}</div>
         </div>
-
       `;
-
     }).join('');
 
   }catch(err){
-
     console.error(err);
 
     count.innerText = '0 vuelos';
-
-    alertBox.innerText =
-      'No se pudieron cargar vuelos reales';
+    alertBox.innerText = 'No se pudieron cargar vuelos reales';
 
     list.innerHTML = `
-      <div class="loading-card">
-        Error loading real flights
-      </div>
+      <div class="loading-card">Error loading real flights</div>
     `;
   }
 }
@@ -489,19 +452,9 @@ async function loadAirports(activeCode = 'KORD'){
 loadAirports();
 
 setInterval(() => {
-
-  const active =
-    document.querySelector('.airport-tab.active .airport-code')
-    ?.innerText;
-
-  loadAirports(
-    active === 'MDW'
-      ? 'KMDW'
-      : 'KORD'
-  );
-
+  const active = document.querySelector('.airport-tab.active .airport-code')?.innerText;
+  loadAirports(active === 'MDW' ? 'KMDW' : 'KORD');
 },60000);
-
 </script>
 
 </body>
