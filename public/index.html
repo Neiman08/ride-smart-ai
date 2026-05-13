@@ -1091,73 +1091,132 @@ document.getElementById('uberScreenshot').addEventListener('change', async funct
   }
 });
 
-const airportsData = {
-  ORD: {
-    name: "O'Hare Intl",
-    city: "Chicago",
-    distance: "22.1 km",
-    demand: "🔥 ALTA DEMANDA: 20 vuelos llegando pronto. Posiciónate cerca.",
-    flights: [
-      { time:"10:54 PM", code:"LXJ 538", airline:"Flexjet", from:"LAS", city:"Las Vegas", pax:"~193 pasajeros", status:"Arrived" },
-      { time:"10:55 PM", code:"WN 2953", airline:"Southwest", from:"LAS", city:"Las Vegas", pax:"~151 pasajeros", status:"Arrived" },
-      { time:"10:57 PM", code:"AA 2194", airline:"American", from:"MIA", city:"Miami", pax:"~151 pasajeros", status:"Arrived" }
-    ]
-  },
-  MDW: {
-    name: "Midway Intl",
-    city: "Chicago",
-    distance: "18.4 km",
-    demand: "⚡ DEMANDA MEDIA: vuelos activos, buena zona si estás cerca.",
-    flights: [
-      { time:"11:05 PM", code:"WN 448", airline:"Southwest", from:"ATL", city:"Atlanta", pax:"~143 pasajeros", status:"Arrived" },
-      { time:"11:12 PM", code:"WN 781", airline:"Southwest", from:"DEN", city:"Denver", pax:"~138 pasajeros", status:"Arrived" }
-    ]
-  }
-};
+async function loadAirports(activeCode = "KORD"){
 
-function loadAirports(activeCode = "ORD"){
   const tabs = document.getElementById("airportTabs");
   const selected = document.getElementById("selectedAirport");
   const count = document.getElementById("flightCount");
   const alertBox = document.getElementById("demandAlert");
   const list = document.getElementById("flightsList");
 
-  if(!tabs || !selected || !count || !alertBox || !list) return;
+  const airportMap = {
+    KORD:{
+      code:"ORD",
+      name:"O'Hare Intl",
+      city:"Chicago",
+      distance:"22.1 km"
+    },
+    KMDW:{
+      code:"MDW",
+      name:"Midway Intl",
+      city:"Chicago",
+      distance:"18.4 km"
+    }
+  };
 
-  tabs.innerHTML = Object.entries(airportsData).map(([code, airport]) => `
-    <div class="airport-tab ${code === activeCode ? 'active' : ''}" onclick="loadAirports('${code}')">
-      <div class="airport-code">${code}</div>
+  tabs.innerHTML = Object.entries(airportMap).map(([icao, airport]) => `
+    <div class="airport-tab ${icao === activeCode ? 'active' : ''}" onclick="loadAirports('${icao}')">
+      <div class="airport-code">${airport.code}</div>
       <div class="airport-name-small">${airport.name}</div>
       <div class="airport-distance">📍 ${airport.distance}</div>
     </div>
   `).join("");
 
-  const airport = airportsData[activeCode];
-
   selected.innerHTML = `
     <div class="airport-icon">✈️</div>
     <div>
-      <div style="font-size:24px;font-weight:900">${airport.name}</div>
-      <div style="color:#9ca3af;font-size:16px">${airport.city} • ${activeCode}</div>
-      <div style="color:#10b981;font-size:16px;font-weight:900;margin-top:4px">${airport.distance} de tu ubicación</div>
+      <div style="font-size:24px;font-weight:900">
+        ${airportMap[activeCode].name}
+      </div>
+
+      <div style="color:#9ca3af;font-size:16px">
+        ${airportMap[activeCode].city}
+      </div>
+
+      <div style="color:#10b981;font-size:16px;font-weight:900;margin-top:4px">
+        ${airportMap[activeCode].distance} de tu ubicación
+      </div>
     </div>
   `;
 
-  count.innerText = `${airport.flights.length} vuelos`;
-  alertBox.innerText = airport.demand;
-
-  list.innerHTML = airport.flights.map(flight => `
+  list.innerHTML = `
     <div class="flight-card">
-      <div class="flight-time">${flight.time}</div>
+      <div class="flight-time">⌛</div>
       <div>
-        <div class="flight-main">✈️ ${flight.code}</div>
-        <div class="flight-sub">${flight.airline}</div>
-        <div class="flight-sub">Desde ${flight.from} • ${flight.city}</div>
-        <div style="color:#10b981;font-weight:900;margin-top:8px">👥 ${flight.pax}</div>
+        <div class="flight-main">Loading flights...</div>
       </div>
-      <div class="flight-status">${flight.status}</div>
     </div>
-  `).join("");
+  `;
+
+  try{
+
+    const response = await fetch(
+      `/api/airports/arrivals/${activeCode}`
+    );
+
+    const data = await response.json();
+
+    count.innerText = `${data.total} vuelos`;
+
+    alertBox.innerText =
+      `🔥 ALTA DEMANDA: ${data.total} vuelos llegando pronto.`;
+
+    list.innerHTML = data.arrivals.map(flight => {
+
+      const localTime = flight.arrivalTime
+        ? new Date(flight.arrivalTime).toLocaleTimeString([], {
+            hour:'2-digit',
+            minute:'2-digit'
+          })
+        : 'N/A';
+
+      return `
+        <div class="flight-card">
+
+          <div class="flight-time">
+            ${localTime}
+          </div>
+
+          <div>
+
+            <div class="flight-main">
+              ✈️ ${flight.flightNumber}
+            </div>
+
+            <div class="flight-sub">
+              ${flight.airline}
+            </div>
+
+            <div class="flight-sub">
+              Desde ${flight.from} • ${flight.city}
+            </div>
+
+            <div style="color:#10b981;font-weight:900;margin-top:8px">
+              🛬 Terminal ${flight.terminal || 'N/A'}
+            </div>
+
+          </div>
+
+          <div class="flight-status">
+            ${flight.status}
+          </div>
+
+        </div>
+      `;
+    }).join("");
+
+  }catch(err){
+
+    console.error(err);
+
+    list.innerHTML = `
+      <div class="flight-card">
+        <div class="flight-main">
+          Error loading real flights
+        </div>
+      </div>
+    `;
+  }
 }
 
 window.initRideSmart = async function(){

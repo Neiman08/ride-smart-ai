@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 import zonesRouter from './routes/zones.js';
+import airportsRoutes from './routes/airports.js';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.use('/api/zones', zonesRouter);
+app.use('/api/airports', airportsRoutes);
 
 const PORT = process.env.PORT || 3000;
 
