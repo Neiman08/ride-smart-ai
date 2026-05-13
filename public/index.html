@@ -429,7 +429,6 @@ function navigateToZone(zoneName){
   const googleMapsUrl =
     `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
 
-  // iPhone fix
   window.location.href = googleMapsUrl;
 }
 
@@ -462,6 +461,7 @@ function renderBestMove(bestMove){
   }
 
   const safeBestMoveName = encodeURIComponent(bestMove.name);
+  const bestPosition = zoneLocations[bestMove.name];
 
   container.innerHTML = `
     <div class="best-move">
@@ -495,7 +495,7 @@ function renderBestMove(bestMove){
         📍 View on Map
       </button>
 
-      <button class="map-btn nav-btn" onclick="navigateToZoneEncoded('${safeBestMoveName}')">
+      <button class="map-btn nav-btn" onclick="window.location.href='https://www.google.com/maps/dir/?api=1&destination=${bestPosition.lat},${bestPosition.lng}&travelmode=driving'">
         🧭 Go with Google Maps
       </button>
     </div>
@@ -676,6 +676,7 @@ async function loadZones(){
       .toLowerCase();
 
     const safeZoneName = encodeURIComponent(zone.name);
+    const position = zoneLocations[zone.name];
 
     card.innerHTML = `
       ${index === 0 ? `<div class="top-badge">🔥 BEST AREA NOW</div>` : ''}
@@ -691,7 +692,7 @@ async function loadZones(){
         📍 View on Map
       </button>
 
-      <button class="map-btn nav-btn" onclick="navigateToZoneEncoded('${safeZoneName}')">
+      <button class="map-btn nav-btn" onclick="window.location.href='https://www.google.com/maps/dir/?api=1&destination=${position.lat},${position.lng}&travelmode=driving'">
         🧭 Go with Google Maps
       </button>
 
