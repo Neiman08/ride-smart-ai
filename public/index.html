@@ -363,7 +363,7 @@ body{
 }
 
 .premium-pay{
-  font-size:clamp(32px, 8vw, 48px) !important;
+  font-size:clamp(34px, 9vw, 58px) !important;
   max-width:100%;
   line-height:1;
   white-space:nowrap;
@@ -399,13 +399,12 @@ body{
   }
 
   .premium-pay{
-  margin-left:0 !important;
-  width:100%;
-  font-size:clamp(34px, 11vw, 48px) !important;
-  text-align:left;
-  white-space:normal !important;
-  letter-spacing:-2px;
-}
+    margin-left:0 !important;
+    width:100%;
+    font-size:clamp(42px, 14vw, 62px) !important;
+    text-align:left;
+    white-space:normal !important;
+  }
 
   .decision-title{
     font-size:clamp(38px, 12vw, 58px) !important;
@@ -729,7 +728,8 @@ function checkOrder(){
   if(pickupMiles >= 10) baseScore -= 12;
   else if(pickupMiles >= 7) baseScore -= 8;
 
-  if(totalMinutes >= 60) baseScore -= 5;
+  if(totalMinutes >= 60) baseScore -= 15;
+  else if(totalMinutes >= 45) baseScore -= 8;
 
   baseScore += passenger.tipScore;
   baseScore += passenger.riskScore;
@@ -758,8 +758,13 @@ function checkOrder(){
 
   const reasons = [];
   if(hourlyRate < 25) reasons.push(`$${hourlyRate.toFixed(2)}/hr < mínimo $25.00/hr`);
-  if(tripMinutes > 20) reasons.push(`${tripMinutes.toFixed(0)} min > máximo 20 min`);
-  if(tripMiles > 10) reasons.push(`${tripMiles.toFixed(1)} mi > máximo 10.0 mi`);
+  
+  if(totalMinutes > 20)
+    reasons.push(`${totalMinutes.toFixed(0)} min totales > máximo 20 min`);
+
+  if(totalMiles > 10)
+    reasons.push(`${totalMiles.toFixed(1)} mi totales > máximo 10.0 mi`);
+
   if(pickupMiles > 7) reasons.push(`${pickupMiles.toFixed(1)} mi pickup muy lejos`);
   if(rating && rating >= 4.90) reasons.push(`Pasajero ${rating.toFixed(2)} ⭐: alta posibilidad de tip`);
   if(reasons.length === 0) reasons.push("Parámetros dentro de rangos óptimos.");
