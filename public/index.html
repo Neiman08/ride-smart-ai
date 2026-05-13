@@ -985,30 +985,112 @@ function useMyLocation(){
 }
 
 function parseUberText(text){
-  const clean = text.replace(/\n+/g, ' ').replace(/\s+/g, ' ');
-  const payMatch = clean.match(/\$ ?(\d+(\.\d{1,2})?)/);
-  const ratingMatch = clean.match(/(?:★|⭐|\*)?\s*(4\.\d{1,2})/);
-  const segments = [...clean.matchAll(/(\d+)\s*(?:hr|h)?\s*(\d+)?\s*min\s*\(?\s*(\d+(\.\d+)?)\s*mi\s*\)?/gi)];
 
-  let pickupMinutes = 0, pickupMiles = 0, tripMinutes = 0, tripMiles = 0;
+  const clean = text
+    .replace(/\n+/g,' ')
+    .replace(/\s+/g,' ')
+    .replace(/,/g,'.');
 
-  if(segments.length >= 1){
-    const s = segments[0];
-    const hr = s[1] && clean.slice(s.index, s.index + 20).toLowerCase().includes('hr') ? parseFloat(s[1]) : 0;
-    const min = hr ? parseFloat(s[2] || 0) : parseFloat(s[1] || 0);
+  console.log('OCR TEXT:', clean);
+
+  // PAY
+  const payMatches = [...clean.matchAll(/\$\s?(\d+(\.\d{1,2})?)/g)];
+
+  let pay = null;
+
+  if(payMatches.length){
+    pay = Math.max(
+      ...payMatches.map(m => parseFloat(m[1]))
+    );
+  }
+
+  // RATING
+  const ratingMatch =
+    clean.match(/(4\.\d{2})/) ||
+    clean.match(/(5\.00)/);
+
+  const rating =
+    ratingMatch
+      ? parseFloat(ratingMatch[1])
+      : null;
+
+  // TIME + DISTANCE BLOCKS
+  const blocks = [
+    ...clean.matchAll(
+      /(\d+)\s*(hr|h)?\s*(\d+)?\s*min.*?(\d+(\.\d+)?)\s*mi/gi
+    )
+  ];
+
+  let pickupMinutes = 0;
+  let pickupMiles = 0;
+
+  let tripMinutes = 0;
+  let tripMiles = 0;
+
+  if(blocks[0]){
+
+    const hr =
+      blocks[0][2]
+        ? parseFloat(blocks[0][1])
+        : 0;
+
+    const min =
+      blocks[0][2]
+        ? parseFloat(blocks[0][3] || 0)
+        : parseFloat(blocks[0][1]);
+
     pickupMinutes = (hr * 60) + min;
-    pickupMiles = parseFloat(s[3]);
-  }
-  if(segments.length >= 2){
-    const s = segments[1];
-    const part = clean.slice(s.index, s.index + 25).toLowerCase();
-    const hr = (part.includes('hr') || part.includes('h ')) ? parseFloat(s[1]) : 0;
-    const min = hr ? parseFloat(s[2] || 0) : parseFloat(s[1] || 0);
-    tripMinutes = (hr * 60) + min;
-    tripMiles = parseFloat(s[3]);
+    pickupMiles = parseFloat(blocks[0][4]);
   }
 
-  return { pay: payMatch ? parseFloat(payMatch[1]) : null, rating: ratingMatch ? parseFloat(ratingMatch[1]) : null, pickupMinutes, pickupMiles, tripMinutes, tripMiles };
+  if(blocks[1]){
+
+    const hr =
+      blocks[1][2]
+        ? parseFloat(blocks[1][1])
+        : 0;
+
+    const min =
+      blocks[1][2]
+        ? parseFloat(blocks[1][3] || 0)
+        : parseFloat(blocks[1][1]);
+
+    tripMinutes = (hr * 60) + min;
+    tripMiles = parseFloat(blocks[1][4]);
+  }
+
+  // FALLBACKS
+
+  if(!tripMiles){
+
+    const miMatches = [
+      ...clean.matchAll(/(\d+(\.\d+)?)\s*mi/gi)
+    ];
+
+    if(miMatches[1]){
+      tripMiles = parseFloat(miMatches[1][1]);
+    }
+  }
+
+  if(!tripMinutes){
+
+    const minMatches = [
+      ...clean.matchAll(/(\d+)\s*min/gi)
+    ];
+
+    if(minMatches[1]){
+      tripMinutes = parseFloat(minMatches[1][1]);
+    }
+  }
+
+  return {
+    pay,
+    rating,
+    pickupMinutes,
+    pickupMiles,
+    tripMinutes,
+    tripMiles
+  };
 }
 
 document.getElementById('uberScreenshot').addEventListener('change', async function(e){
