@@ -15,7 +15,14 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.use('/api/zones', zonesRouter);
+
 app.use('/api/airports', airportsRouter);
+
+/*
+  ESTA LÍNEA SOLUCIONA:
+  Cannot GET /api/flights
+*/
+app.use('/api/flights', airportsRouter);
 
 const PORT = process.env.PORT || 3000;
 
