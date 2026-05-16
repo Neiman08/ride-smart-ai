@@ -436,7 +436,6 @@ const minDpm = document.getElementById("minDpm");
 const minHourly = document.getElementById("minHourly");
 const maxPickup = document.getElementById("maxPickup");
 const maxTotal = document.getElementById("maxTotal");
-
 const enableAI = document.getElementById("enableAI");
 const ignoreBad = document.getElementById("ignoreBad");
 const testMode = document.getElementById("testMode");
@@ -444,67 +443,11 @@ const airportMode = document.getElementById("airportMode");
 const avoidDowntown = document.getElementById("avoidDowntown");
 const hotZonesOnly = document.getElementById("hotZonesOnly");
 
-function updateLabels(){
-  document.getElementById("minDpmValue").innerText =
-    "$" + Number(minDpm.value).toFixed(2);
-
-  document.getElementById("minHourlyValue").innerText =
-    "$" + Number(minHourly.value).toFixed(0);
-
-  document.getElementById("maxPickupValue").innerText =
-    Number(maxPickup.value).toFixed(1) + " mi";
-
-  document.getElementById("maxTotalValue").innerText =
-    Number(maxTotal.value).toFixed(0) + " mi";
-
-  const engineStatus = document.getElementById("engineStatus");
-  engineStatus.innerText = enableAI.checked ? "ACTIVE" : "OFF";
-  engineStatus.style.color = enableAI.checked ? "#00ff88" : "#ef4444";
-}
-
-function getFilters(){
-  return {
-    minDpm: Number(minDpm.value),
-    minHourly: Number(minHourly.value),
-    maxPickup: Number(maxPickup.value),
-    maxTotal: Number(maxTotal.value),
-    enableAI: enableAI.checked,
-    ignoreBad: ignoreBad.checked,
-    testMode: testMode.checked,
-    airportMode: airportMode.checked,
-    avoidDowntown: avoidDowntown.checked,
-    hotZonesOnly: hotZonesOnly.checked
-  };
-}
-
-async function saveFilters(){
-  const filters = getFilters();
-
-  localStorage.setItem("ridesmart_filters", JSON.stringify(filters));
-
-  try {
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences) {
-      const Preferences = window.Capacitor.Plugins.Preferences;
-
-      for (const [key, value] of Object.entries(filters)) {
-        await Preferences.set({
-          key: key,
-          value: String(value)
-        });
-      }
-    }
-  } catch (e) {
-    console.log("Native Preferences error:", e);
-  }
-
-  updateLabels();
-
-  const toast = document.getElementById("toast");
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 1800);
-
-  console.log("✅ Filters saved:", filters);
-}
+const minDpmValue = document.getElementById("minDpmValue");
+const minHourlyValue = document.getElementById("minHourlyValue");
+const maxPickupValue = document.getElementById("maxPickupValue");
+const maxTotalValue = document.getElementById("maxTotalValue");
+const engineStatus = document.getElementById("engineStatus");
 
 function loadFilters(){
   const saved = JSON.parse(localStorage.getItem("ridesmart_filters") || "{}");
@@ -525,6 +468,38 @@ function loadFilters(){
   updateLabels();
 }
 
+function updateLabels(){
+  minDpmValue.innerText = "$" + Number(minDpm.value).toFixed(2);
+  minHourlyValue.innerText = "$" + Number(minHourly.value).toFixed(0);
+  maxPickupValue.innerText = Number(maxPickup.value).toFixed(1) + " mi";
+  maxTotalValue.innerText = Number(maxTotal.value).toFixed(0) + " mi";
+  
+  engineStatus.innerText = enableAI.checked ? "ACTIVE" : "OFF";
+  engineStatus.style.color = enableAI.checked ? "#00ff88" : "#ef4444";
+}
+
+function saveFilters(){
+  const filters = {
+    minDpm: Number(minDpm.value),
+    minHourly: Number(minHourly.value),
+    maxPickup: Number(maxPickup.value),
+    maxTotal: Number(maxTotal.value),
+    enableAI: enableAI.checked,
+    ignoreBad: ignoreBad.checked,
+    testMode: testMode.checked,
+    airportMode: airportMode.checked,
+    avoidDowntown: avoidDowntown.checked,
+    hotZonesOnly: hotZonesOnly.checked
+  };
+
+  localStorage.setItem("ridesmart_filters", JSON.stringify(filters));
+
+  const toast = document.getElementById("toast");
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 1800);
+}
+
+// Bloque de eventos optimizado
 [
   minDpm,
   minHourly,
@@ -540,8 +515,6 @@ function loadFilters(){
   el.addEventListener("input", updateLabels);
   el.addEventListener("change", updateLabels);
 });
-
-window.saveFilters = saveFilters;
 
 loadFilters();
 </script>

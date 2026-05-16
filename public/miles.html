@@ -5,31 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ride Smart AI | Miles Tracker</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
 body{
-  font-family:Arial,sans-serif;
-  background:#050505;
+  font-family:'Inter',sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(0,255,136,.18), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(59,130,246,.18), transparent 40%),
+    #050505;
   color:white;
+  min-height:100vh;
   padding:18px;
-  padding-bottom:120px;
+  padding-bottom:170px;
 }
 
 .header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:22px;
+  margin-bottom:24px;
 }
 
 .back{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
   color:white;
+  padding:12px 16px;
+  border-radius:16px;
   text-decoration:none;
   font-weight:900;
-  background:#111;
-  padding:12px 16px;
-  border-radius:14px;
 }
 
 .badge{
@@ -37,54 +44,96 @@ body{
   color:#001b0d;
   padding:9px 14px;
   border-radius:999px;
-  font-weight:900;
   font-size:13px;
+  font-weight:900;
 }
 
 .title{
   font-size:38px;
+  line-height:1.05;
   font-weight:900;
-  line-height:1;
   margin-bottom:10px;
 }
 
 .subtitle{
-  color:#999;
-  margin-bottom:24px;
+  color:#9ca3af;
+  font-size:16px;
   line-height:1.5;
+  margin-bottom:24px;
 }
 
-.card{
-  background:#111827;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:24px;
-  padding:20px;
+.status-card{
+  background:linear-gradient(135deg, rgba(0,255,136,.20), rgba(59,130,246,.14));
+  border:1px solid rgba(0,255,136,.35);
+  border-radius:28px;
+  padding:22px;
+  margin-bottom:22px;
+  box-shadow:0 20px 60px rgba(0,255,136,.08);
+}
+
+.status-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
   margin-bottom:16px;
 }
 
-.status{
-  font-size:22px;
+.status-title{
+  font-size:20px;
   font-weight:900;
-  color:#00ff88;
 }
 
-.big{
+.status-value{
+  color:#00ff88;
+  font-weight:900;
+}
+
+.big-mile{
   font-size:54px;
   font-weight:900;
   color:#00ff88;
-  margin-top:10px;
+  margin-top:8px;
+  line-height:1;
 }
 
 .grid{
   display:grid;
+  gap:16px;
+}
+
+.card{
+  background:rgba(17,24,39,.82);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:24px;
+  padding:20px;
+  backdrop-filter:blur(18px);
+}
+
+.card-title{
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.card-desc{
+  color:#9ca3af;
+  font-size:14px;
+  line-height:1.4;
+  margin-bottom:18px;
+}
+
+.stat-grid{
+  display:grid;
   grid-template-columns:1fr 1fr;
-  gap:12px;
+  gap:16px;
+  margin-bottom:16px;
 }
 
 .stat{
-  background:#0b0f16;
-  border-radius:18px;
-  padding:16px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  padding:18px;
 }
 
 .stat span{
@@ -96,35 +145,56 @@ body{
 }
 
 .stat strong{
+  color:white;
   font-size:22px;
+  font-weight:900;
 }
 
 .btn{
   width:100%;
   padding:18px;
   border:none;
-  border-radius:18px;
+  border-radius:22px;
   font-size:17px;
   font-weight:900;
   margin-top:12px;
+  cursor:pointer;
 }
 
-.start{background:#00ff88;color:#001b0d}
-.break{background:#facc15;color:#111}
-.end{background:#ef4444;color:white}
-.reset{background:#222;color:white}
+.start{
+  background:linear-gradient(135deg,#00ff88,#6bff95);
+  color:#03120a;
+  box-shadow:0 18px 45px rgba(0,255,136,.20);
+}
+
+.break{
+  background:#facc15;
+  color:#111;
+}
+
+.end{
+  background:#ef4444;
+  color:white;
+}
+
+.reset{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  color:white;
+}
 
 .footer-nav{
   position:fixed;
   left:14px;
   right:14px;
   bottom:14px;
-  background:rgba(10,10,10,.94);
+  background:rgba(10,10,10,.92);
   border:1px solid rgba(255,255,255,.12);
   border-radius:24px;
   display:grid;
   grid-template-columns:repeat(4,1fr);
   padding:10px;
+  backdrop-filter:blur(20px);
 }
 
 .footer-nav a{
@@ -141,10 +211,36 @@ body{
   background:#00ff88;
   color:#001b0d;
 }
+
+.toast{
+  position:fixed;
+  top:18px;
+  left:18px;
+  right:18px;
+  background:#00ff88;
+  color:#001b0d;
+  padding:16px;
+  border-radius:18px;
+  font-weight:900;
+  text-align:center;
+  transform:translateY(-120px);
+  transition:.25s;
+  z-index:10;
+}
+
+.toast.show{transform:translateY(0)}
+
+@media(min-width:800px){
+  body{max-width:900px;margin:0 auto}
+  .grid{grid-template-columns:1fr 1fr}
+  .status-card{grid-column:1/-1}
+}
 </style>
 </head>
 
 <body>
+
+<div class="toast" id="toast">✅ Miles Tracker actualizado</div>
 
 <div class="header">
   <a class="back" href="/">← Volver</a>
@@ -156,13 +252,20 @@ body{
   Enciende el turno cuando empieces a trabajar. Pausa en break y finaliza al terminar.
 </p>
 
-<div class="card">
-  <div>Estado actual</div>
-  <div class="status" id="shiftStatus">OFF</div>
-  <div class="big" id="totalMiles">0.0 mi</div>
+<div class="status-card">
+  <div class="status-top">
+    <div class="status-title">Estado actual</div>
+    <div class="status-value" id="shiftStatus">OFF</div>
+  </div>
+
+  <p class="card-desc">
+    Este módulo contará las millas reales recorridas durante tu turno usando GPS.
+  </p>
+
+  <div class="big-mile" id="totalMiles">0.0 mi</div>
 </div>
 
-<div class="grid">
+<div class="stat-grid">
   <div class="stat">
     <span>Tiempo activo</span>
     <strong id="activeTime">00:00</strong>
@@ -185,6 +288,11 @@ body{
 </div>
 
 <div class="card">
+  <div class="card-title">⚙️ Control del turno</div>
+  <div class="card-desc">
+    Usa estos botones para comenzar, pausar o finalizar tu jornada.
+  </div>
+
   <button class="btn start" onclick="startShift()">🟢 START SHIFT</button>
   <button class="btn break" onclick="toggleBreak()">⏸ BREAK / RESUME</button>
   <button class="btn end" onclick="endShift()">🔴 END SHIFT</button>
@@ -216,6 +324,13 @@ function save(){
   localStorage.setItem("ridesmart_miles", JSON.stringify(data));
 }
 
+function showToast(message){
+  const toast = document.getElementById("toast");
+  toast.innerText = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 1800);
+}
+
 function render(){
   document.getElementById("shiftStatus").innerText = data.status;
   document.getElementById("totalMiles").innerText = data.totalMiles.toFixed(1) + " mi";
@@ -225,6 +340,13 @@ function render(){
 
   const ppm = data.totalMiles > 0 ? data.earnings / data.totalMiles : 0;
   document.getElementById("profitPerMile").innerText = "$" + ppm.toFixed(2);
+
+  const status = document.getElementById("shiftStatus");
+  status.style.color =
+    data.status === "ACTIVE" ? "#00ff88" :
+    data.status === "BREAK" ? "#facc15" :
+    data.status === "ENDED" ? "#ef4444" :
+    "#00ff88";
 }
 
 function formatTime(seconds){
@@ -241,6 +363,7 @@ function startShift(){
   save();
   render();
   startGPS();
+  showToast("🟢 Turno iniciado");
 }
 
 function toggleBreak(){
@@ -250,6 +373,8 @@ function toggleBreak(){
   data.status = onBreak ? "BREAK" : "ACTIVE";
   save();
   render();
+
+  showToast(onBreak ? "⏸ Break activado" : "▶️ Turno reanudado");
 }
 
 function endShift(){
@@ -264,6 +389,7 @@ function endShift(){
 
   save();
   render();
+  showToast("🔴 Turno finalizado");
 }
 
 function resetDay(){
@@ -286,6 +412,7 @@ function resetDay(){
 
   save();
   render();
+  showToast("♻️ Día reiniciado");
 }
 
 function startGPS(){
