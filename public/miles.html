@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ride Smart AI | Miles Tracker</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:Arial,sans-serif;
+  background:#050505;
+  color:white;
+  padding:18px;
+  padding-bottom:120px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:22px;
+}
+
+.back{
+  color:white;
+  text-decoration:none;
+  font-weight:900;
+  background:#111;
+  padding:12px 16px;
+  border-radius:14px;
+}
+
+.badge{
+  background:#00ff88;
+  color:#001b0d;
+  padding:9px 14px;
+  border-radius:999px;
+  font-weight:900;
+  font-size:13px;
+}
+
+.title{
+  font-size:38px;
+  font-weight:900;
+  line-height:1;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  color:#999;
+  margin-bottom:24px;
+  line-height:1.5;
+}
+
+.card{
+  background:#111827;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:24px;
+  padding:20px;
+  margin-bottom:16px;
+}
+
+.status{
+  font-size:22px;
+  font-weight:900;
+  color:#00ff88;
+}
+
+.big{
+  font-size:54px;
+  font-weight:900;
+  color:#00ff88;
+  margin-top:10px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.stat{
+  background:#0b0f16;
+  border-radius:18px;
+  padding:16px;
+}
+
+.stat span{
+  display:block;
+  color:#9ca3af;
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+
+.stat strong{
+  font-size:22px;
+}
+
+.btn{
+  width:100%;
+  padding:18px;
+  border:none;
+  border-radius:18px;
+  font-size:17px;
+  font-weight:900;
+  margin-top:12px;
+}
+
+.start{background:#00ff88;color:#001b0d}
+.break{background:#facc15;color:#111}
+.end{background:#ef4444;color:white}
+.reset{background:#222;color:white}
+
+.footer-nav{
+  position:fixed;
+  left:14px;
+  right:14px;
+  bottom:14px;
+  background:rgba(10,10,10,.94);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  padding:10px;
+}
+
+.footer-nav a{
+  text-align:center;
+  text-decoration:none;
+  color:#9ca3af;
+  font-size:12px;
+  font-weight:900;
+  padding:10px 4px;
+  border-radius:16px;
+}
+
+.footer-nav a.active{
+  background:#00ff88;
+  color:#001b0d;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <a class="back" href="/">← Volver</a>
+  <div class="badge">MILES TRACKER</div>
+</div>
+
+<h1 class="title">Daily Miles<br>Tracker</h1>
+<p class="subtitle">
+  Enciende el turno cuando empieces a trabajar. Pausa en break y finaliza al terminar.
+</p>
+
+<div class="card">
+  <div>Estado actual</div>
+  <div class="status" id="shiftStatus">OFF</div>
+  <div class="big" id="totalMiles">0.0 mi</div>
+</div>
+
+<div class="grid">
+  <div class="stat">
+    <span>Tiempo activo</span>
+    <strong id="activeTime">00:00</strong>
+  </div>
+
+  <div class="stat">
+    <span>Break</span>
+    <strong id="breakTime">00:00</strong>
+  </div>
+
+  <div class="stat">
+    <span>Ganancias</span>
+    <strong id="earnings">$0.00</strong>
+  </div>
+
+  <div class="stat">
+    <span>$/mi real</span>
+    <strong id="profitPerMile">$0.00</strong>
+  </div>
+</div>
+
+<div class="card">
+  <button class="btn start" onclick="startShift()">🟢 START SHIFT</button>
+  <button class="btn break" onclick="toggleBreak()">⏸ BREAK / RESUME</button>
+  <button class="btn end" onclick="endShift()">🔴 END SHIFT</button>
+  <button class="btn reset" onclick="resetDay()">♻️ RESET DAY</button>
+</div>
+
+<div class="footer-nav">
+  <a href="/">Home</a>
+  <a href="/airports.html">Airports</a>
+  <a href="/filters.html">Filters</a>
+  <a class="active" href="/miles.html">Miles</a>
+</div>
+
+<script>
+let tracking = false;
+let onBreak = false;
+let watchId = null;
+let lastPosition = null;
+
+let data = JSON.parse(localStorage.getItem("ridesmart_miles") || "null") || {
+  totalMiles: 0,
+  activeSeconds: 0,
+  breakSeconds: 0,
+  earnings: 0,
+  status: "OFF"
+};
+
+function save(){
+  localStorage.setItem("ridesmart_miles", JSON.stringify(data));
+}
+
+function render(){
+  document.getElementById("shiftStatus").innerText = data.status;
+  document.getElementById("totalMiles").innerText = data.totalMiles.toFixed(1) + " mi";
+  document.getElementById("activeTime").innerText = formatTime(data.activeSeconds);
+  document.getElementById("breakTime").innerText = formatTime(data.breakSeconds);
+  document.getElementById("earnings").innerText = "$" + data.earnings.toFixed(2);
+
+  const ppm = data.totalMiles > 0 ? data.earnings / data.totalMiles : 0;
+  document.getElementById("profitPerMile").innerText = "$" + ppm.toFixed(2);
+}
+
+function formatTime(seconds){
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0");
+}
+
+function startShift(){
+  tracking = true;
+  onBreak = false;
+  data.status = "ACTIVE";
+  lastPosition = null;
+  save();
+  render();
+  startGPS();
+}
+
+function toggleBreak(){
+  if(!tracking) return;
+
+  onBreak = !onBreak;
+  data.status = onBreak ? "BREAK" : "ACTIVE";
+  save();
+  render();
+}
+
+function endShift(){
+  tracking = false;
+  onBreak = false;
+  data.status = "ENDED";
+
+  if(watchId !== null){
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+
+  save();
+  render();
+}
+
+function resetDay(){
+  tracking = false;
+  onBreak = false;
+  lastPosition = null;
+
+  if(watchId !== null){
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+
+  data = {
+    totalMiles: 0,
+    activeSeconds: 0,
+    breakSeconds: 0,
+    earnings: 0,
+    status: "OFF"
+  };
+
+  save();
+  render();
+}
+
+function startGPS(){
+  if(!navigator.geolocation){
+    alert("GPS no disponible");
+    return;
+  }
+
+  if(watchId !== null){
+    navigator.geolocation.clearWatch(watchId);
+  }
+
+  watchId = navigator.geolocation.watchPosition(
+    position => {
+      if(!tracking || onBreak) return;
+
+      const current = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+      if(lastPosition){
+        const miles = distanceMiles(lastPosition, current);
+
+        if(miles > 0 && miles < 2){
+          data.totalMiles += miles;
+          save();
+          render();
+        }
+      }
+
+      lastPosition = current;
+    },
+    error => {
+      console.log("GPS error:", error);
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 2000,
+      timeout: 10000
+    }
+  );
+}
+
+function distanceMiles(a,b){
+  const R = 3958.8;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+
+  const x =
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1) * Math.cos(lat2) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+
+  const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+  return R * c;
+}
+
+function toRad(value){
+  return value * Math.PI / 180;
+}
+
+setInterval(() => {
+  if(tracking){
+    if(onBreak){
+      data.breakSeconds++;
+    }else{
+      data.activeSeconds++;
+    }
+
+    save();
+    render();
+  }
+}, 1000);
+
+render();
+</script>
+
+</body>
+</html>

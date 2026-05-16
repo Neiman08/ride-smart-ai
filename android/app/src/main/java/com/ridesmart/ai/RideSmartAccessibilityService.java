@@ -164,10 +164,29 @@ public class RideSmartAccessibilityService extends AccessibilityService {
 
                 if (overlayText == null) {
                     overlayText = new TextView(this);
+
                     overlayText.setTextColor(Color.WHITE);
-                    overlayText.setTextSize(18);
-                    overlayText.setGravity(Gravity.CENTER);
-                    overlayText.setPadding(20, 75, 20, 20);
+
+                    overlayText.setTextSize(16);
+
+                    overlayText.setGravity(Gravity.START);
+
+                    overlayText.setPadding(40, 90, 40, 40);
+
+                    overlayText.setLineSpacing(8f, 1f);
+
+                    overlayText.setElevation(20f);
+
+                    overlayText.setShadowLayer(
+                            18f,
+                            0f,
+                            0f,
+                            Color.parseColor("#00FF88")
+                    );
+
+                    overlayText.setBackgroundColor(
+                            Color.parseColor("#CC0A0A0A")
+                    );
 
                     WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                             WindowManager.LayoutParams.MATCH_PARENT,
@@ -187,7 +206,12 @@ public class RideSmartAccessibilityService extends AccessibilityService {
                 }
 
                 overlayText.setBackgroundColor(Color.parseColor(color));
-                overlayText.setText(message.trim());
+                overlayText.setText(
+                        "🔥 RIDE SMART AI\n" +
+                                "━━━━━━━━━━\n" +
+                                message.trim() +
+                                "\n━━━━━━━━━━"
+                );
 
                 WindowManager.LayoutParams params =
                         (WindowManager.LayoutParams) overlayText.getTag();
@@ -280,35 +304,38 @@ public class RideSmartAccessibilityService extends AccessibilityService {
         SharedPreferences prefs =
                 getSharedPreferences("CapacitorStorage", MODE_PRIVATE);
 
+        SharedPreferences fallbackPrefs =
+                getSharedPreferences("ridesmart_filters", MODE_PRIVATE);
+
         boolean enableAI =
-                getBooleanPref(prefs, "enableAI", true);
+                getBooleanPrefDual(prefs, fallbackPrefs, "enableAI", true);
 
         boolean ignoreBad =
-                getBooleanPref(prefs, "ignoreBad", true);
+                getBooleanPrefDual(prefs, fallbackPrefs, "ignoreBad", true);
 
         boolean testMode =
-                getBooleanPref(prefs, "testMode", true);
+                getBooleanPrefDual(prefs, fallbackPrefs, "testMode", true);
 
         boolean airportMode =
-                getBooleanPref(prefs, "airportMode", false);
+                getBooleanPrefDual(prefs, fallbackPrefs, "airportMode", false);
 
         boolean avoidDowntown =
-                getBooleanPref(prefs, "avoidDowntown", false);
+                getBooleanPrefDual(prefs, fallbackPrefs, "avoidDowntown", false);
 
         boolean hotZonesOnly =
-                getBooleanPref(prefs, "hotZonesOnly", false);
+                getBooleanPrefDual(prefs, fallbackPrefs, "hotZonesOnly", false);
 
         double minDpm =
-                getDoublePref(prefs, "minDpm", 1.40);
+                getDoublePrefDual(prefs, fallbackPrefs, "minDpm", 1.40);
 
         double minHourly =
-                getDoublePref(prefs, "minHourly", 26.0);
+                getDoublePrefDual(prefs, fallbackPrefs, "minHourly", 26.0);
 
         double maxPickup =
-                getDoublePref(prefs, "maxPickup", 5.0);
+                getDoublePrefDual(prefs, fallbackPrefs, "maxPickup", 5.0);
 
         double maxTotal =
-                getDoublePref(prefs, "maxTotal", 35.0);
+                getDoublePrefDual(prefs, fallbackPrefs, "maxTotal", 35.0);
 
         if (!enableAI) {
             return "⚠️ AI SNIPER OFF";
@@ -557,5 +584,43 @@ public class RideSmartAccessibilityService extends AccessibilityService {
                 node.recycle();
             }
         } catch (Exception ignored) {}
+    }
+
+    private boolean getBooleanPrefDual(
+            SharedPreferences primary,
+            SharedPreferences fallbackPrefs,
+            String key,
+            boolean fallback
+    ) {
+        try {
+            if (primary.contains(key)) {
+                return getBooleanPref(primary, key, fallback);
+            }
+            if (fallbackPrefs.contains(key)) {
+                return getBooleanPref(fallbackPrefs, key, fallback);
+            }
+            return fallback;
+        } catch (Exception e) {
+            return fallback;
+        }
+    }
+
+    private double getDoublePrefDual(
+            SharedPreferences primary,
+            SharedPreferences fallbackPrefs,
+            String key,
+            double fallback
+    ) {
+        try {
+            if (primary.contains(key)) {
+                return getDoublePref(primary, key, fallback);
+            }
+            if (fallbackPrefs.contains(key)) {
+                return getDoublePref(fallbackPrefs, key, fallback);
+            }
+            return fallback;
+        } catch (Exception e) {
+            return fallback;
+        }
     }
 }
