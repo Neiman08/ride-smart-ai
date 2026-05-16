@@ -453,6 +453,12 @@ body{
   </button>
 </a>
 
+<a href="/filters.html" style="text-decoration:none;">
+  <button class="check-btn" style="margin-bottom:18px; background:#111; color:#00ff88; border:1px solid rgba(0,255,136,.35);">
+    ⚙️ AI Filters / Sniper Settings
+  </button>
+</a>
+
 <div id="weather"></div>
 <div id="bestMove"></div>
 
@@ -1147,6 +1153,8 @@ function parseUberText(text){
       tripMinutes = parseFloat(minMatches[1][1]);
     }
   }
+
+
 
   return {
     pay,

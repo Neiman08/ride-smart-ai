@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ride Smart AI | Filters</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(0,255,136,.18), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(59,130,246,.18), transparent 40%),
+    #050505;
+  color:white;
+  min-height:100vh;
+  padding:18px;
+  padding-bottom:170px; /* Ajustado para mejor scroll en móvil */
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:24px;
+}
+
+.back{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  color:white;
+  padding:12px 16px;
+  border-radius:16px;
+  text-decoration:none;
+  font-weight:900;
+}
+
+.badge{
+  background:#00ff88;
+  color:#001b0d;
+  padding:9px 14px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:900;
+}
+
+.title{
+  font-size:38px;
+  line-height:1.05;
+  font-weight:900;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  color:#9ca3af;
+  font-size:16px;
+  line-height:1.5;
+  margin-bottom:24px;
+}
+
+.status-card{
+  background:linear-gradient(135deg, rgba(0,255,136,.20), rgba(59,130,246,.14));
+  border:1px solid rgba(0,255,136,.35);
+  border-radius:28px;
+  padding:22px;
+  margin-bottom:22px;
+  box-shadow:0 20px 60px rgba(0,255,136,.08);
+}
+
+.status-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.status-title{
+  font-size:20px;
+  font-weight:900;
+}
+
+.status-value{
+  color:#00ff88;
+  font-weight:900;
+}
+
+.grid{
+  display:grid;
+  gap:16px;
+}
+
+.card{
+  background:rgba(17,24,39,.82);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:24px;
+  padding:20px;
+  backdrop-filter:blur(18px);
+}
+
+.card-title{
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.card-desc{
+  color:#9ca3af;
+  font-size:14px;
+  line-height:1.4;
+  margin-bottom:18px;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  margin-bottom:16px;
+}
+
+.label{
+  font-size:15px;
+  font-weight:800;
+}
+
+.value{
+  color:#00ff88;
+  font-size:18px;
+  font-weight:900;
+}
+
+input[type="range"]{
+  width:100%;
+  accent-color:#00ff88;
+}
+
+.switch-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:16px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.switch-row:last-child{border-bottom:none}
+
+.switch-text strong{
+  display:block;
+  font-size:16px;
+  margin-bottom:4px;
+}
+
+.switch-text span{
+  color:#9ca3af;
+  font-size:13px;
+}
+
+.toggle{
+  position:relative;
+  width:58px;
+  height:32px;
+  flex:0 0 auto;
+}
+
+.toggle input{display:none}
+
+.slider{
+  position:absolute;
+  cursor:pointer;
+  inset:0;
+  background:#374151;
+  border-radius:999px;
+  transition:.2s;
+}
+
+.slider:before{
+  content:"";
+  position:absolute;
+  width:24px;
+  height:24px;
+  left:4px;
+  top:4px;
+  background:white;
+  border-radius:50%;
+  transition:.2s;
+}
+
+.toggle input:checked + .slider{
+  background:#00ff88;
+}
+
+.toggle input:checked + .slider:before{
+  transform:translateX(26px);
+}
+
+.save-btn{
+  width:100%;
+  margin-top:24px;
+  padding:18px;
+  border:none;
+  border-radius:22px;
+  background:linear-gradient(135deg,#00ff88,#3b82f6);
+  color:#03120a;
+  font-size:17px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 18px 45px rgba(0,255,136,.22);
+}
+
+.footer-nav{
+  position:fixed;
+  left:14px;
+  right:14px;
+  bottom:14px;
+  background:rgba(10,10,10,.92);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:24px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  padding:10px;
+  backdrop-filter:blur(20px);
+}
+
+.footer-nav a{
+  text-align:center;
+  text-decoration:none;
+  color:#9ca3af;
+  font-size:12px;
+  font-weight:900;
+  padding:10px 4px;
+  border-radius:16px;
+}
+
+.footer-nav a.active{
+  background:#00ff88;
+  color:#001b0d;
+}
+
+.toast{
+  position:fixed;
+  top:18px;
+  left:18px;
+  right:18px;
+  background:#00ff88;
+  color:#001b0d;
+  padding:16px;
+  border-radius:18px;
+  font-weight:900;
+  text-align:center;
+  transform:translateY(-120px);
+  transition:.25s;
+  z-index:10;
+}
+
+.toast.show{transform:translateY(0)}
+
+@media(min-width:800px){
+  body{max-width:900px;margin:0 auto}
+  .grid{grid-template-columns:1fr 1fr}
+  .status-card{grid-column:1/-1}
+}
+</style>
+</head>
+
+<body>
+
+<div class="toast" id="toast">✅ Configuración guardada</div>
+
+<div class="header">
+  <a class="back" href="/">← Volver</a>
+  <div class="badge">SNIPER MODE</div>
+</div>
+
+<h1 class="title">Ride Smart AI<br>Command Center</h1>
+<p class="subtitle">
+  Configura cómo Ride Smart decide si una orden de Lyft/Uber es buena, regular o mala antes de aceptarla.
+</p>
+
+<div class="status-card">
+  <div class="status-top">
+    <div class="status-title">AI Decision Engine</div>
+    <div class="status-value" id="engineStatus">ACTIVE</div>
+  </div>
+  <p class="card-desc">
+    Estos filtros se guardan en el teléfono y luego serán leídos por el servicio de accesibilidad para analizar cada orden en tiempo real.
+  </p>
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="card-title">💵 Rentabilidad mínima</div>
+    <div class="card-desc">Define cuánto debe pagar una orden para considerarse buena.</div>
+
+    <div class="row">
+      <div class="label">Mínimo $/mi</div>
+      <div class="value" id="minDpmValue">$1.40</div>
+    </div>
+    <input id="minDpm" type="range" min="0.50" max="3.00" step="0.05">
+
+    <br><br>
+
+    <div class="row">
+      <div class="label">Mínimo $/hora</div>
+      <div class="value" id="minHourlyValue">$26</div>
+    </div>
+    <input id="minHourly" type="range" min="10" max="60" step="1">
+  </div>
+
+  <div class="card">
+    <div class="card-title">📍 Distancia permitida</div>
+    <div class="card-desc">Controla qué tan lejos puede estar el pasajero y cuánto puede durar el viaje.</div>
+
+    <div class="row">
+      <div class="label">Pickup máximo</div>
+      <div class="value" id="maxPickupValue">5 mi</div>
+    </div>
+    <input id="maxPickup" type="range" min="1" max="15" step="0.5">
+
+    <br><br>
+
+    <div class="row">
+      <div class="label">Millas máximas totales</div>
+      <div class="value" id="maxTotalValue">35 mi</div>
+    </div>
+    <input id="maxTotal" type="range" min="5" max="80" step="1">
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙️ Modos inteligentes</div>
+    <div class="card-desc">Activa o desactiva reglas automáticas del motor.</div>
+
+    <div class="switch-row">
+      <div class="switch-text">
+        <strong>AI Sniper activo</strong>
+        <span>Permite analizar órdenes en tiempo real.</span>
+      </div>
+      <label class="toggle">
+        <input id="enableAI" type="checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="switch-row">
+      <div class="switch-text">
+        <strong>Ignorar viajes malos</strong>
+        <span>No marcar como aceptable lo que no pase filtros.</span>
+      </div>
+      <label class="toggle">
+        <input id="ignoreBad" type="checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="switch-row">
+      <div class="switch-text">
+        <strong>Auto Accept prueba</strong>
+        <span>Solo muestra “READY”, no toca el botón todavía.</span>
+      </div>
+      <label class="toggle">
+        <input id="testMode" type="checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔥 Zonas y aeropuerto</div>
+    <div class="card-desc">Filtros especiales para mantenerte en zonas rentables.</div>
+
+    <div class="switch-row">
+      <div class="switch-text">
+        <strong>Modo aeropuerto</strong>
+        <span>Priorizar viajes hacia/desde ORD y MDW.</span>
+      </div>
+      <label class="toggle">
+        <input id="airportMode" type="checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="switch-row">
+      <div class="switch-text">
+        <strong>Evitar Downtown</strong>
+        <span>Evitar viajes que te metan en zonas lentas o tráfico fuerte.</span>
+      </div>
+      <label class="toggle">
+        <input id="avoidDowntown" type="checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="switch-row">
+      <div class="switch-text">
+        <strong>Hot Zones Only</strong>
+        <span>Aceptar solo si el destino cae cerca de zonas calientes.</span>
+      </div>
+      <label class="toggle">
+        <input id="hotZonesOnly" type="checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+</div>
+
+<button class="save-btn" onclick="saveFilters()">GUARDAR CONFIGURACIÓN</button>
+
+<div class="footer-nav">
+  <a href="/">Home</a>
+  <a href="/airports.html">Airports</a>
+  <a href="/zones.html">Zones</a>
+  <a class="active" href="/filters.html">Filters</a>
+</div>
+
+<script>
+const defaults = {
+  minDpm: 1.40,
+  minHourly: 26,
+  maxPickup: 5,
+  maxTotal: 35,
+  enableAI: true,
+  ignoreBad: true,
+  testMode: true,
+  airportMode: false,
+  avoidDowntown: false,
+  hotZonesOnly: false
+};
+
+const minDpm = document.getElementById("minDpm");
+const minHourly = document.getElementById("minHourly");
+const maxPickup = document.getElementById("maxPickup");
+const maxTotal = document.getElementById("maxTotal");
+const enableAI = document.getElementById("enableAI");
+const ignoreBad = document.getElementById("ignoreBad");
+const testMode = document.getElementById("testMode");
+const airportMode = document.getElementById("airportMode");
+const avoidDowntown = document.getElementById("avoidDowntown");
+const hotZonesOnly = document.getElementById("hotZonesOnly");
+
+const minDpmValue = document.getElementById("minDpmValue");
+const minHourlyValue = document.getElementById("minHourlyValue");
+const maxPickupValue = document.getElementById("maxPickupValue");
+const maxTotalValue = document.getElementById("maxTotalValue");
+const engineStatus = document.getElementById("engineStatus");
+
+function loadFilters(){
+  const saved = JSON.parse(localStorage.getItem("ridesmart_filters") || "{}");
+  const f = {...defaults, ...saved};
+
+  minDpm.value = f.minDpm;
+  minHourly.value = f.minHourly;
+  maxPickup.value = f.maxPickup;
+  maxTotal.value = f.maxTotal;
+
+  enableAI.checked = f.enableAI;
+  ignoreBad.checked = f.ignoreBad;
+  testMode.checked = f.testMode;
+  airportMode.checked = f.airportMode;
+  avoidDowntown.checked = f.avoidDowntown;
+  hotZonesOnly.checked = f.hotZonesOnly;
+
+  updateLabels();
+}
+
+function updateLabels(){
+  minDpmValue.innerText = "$" + Number(minDpm.value).toFixed(2);
+  minHourlyValue.innerText = "$" + Number(minHourly.value).toFixed(0);
+  maxPickupValue.innerText = Number(maxPickup.value).toFixed(1) + " mi";
+  maxTotalValue.innerText = Number(maxTotal.value).toFixed(0) + " mi";
+  
+  engineStatus.innerText = enableAI.checked ? "ACTIVE" : "OFF";
+  engineStatus.style.color = enableAI.checked ? "#00ff88" : "#ef4444";
+}
+
+function saveFilters(){
+  const filters = {
+    minDpm: Number(minDpm.value),
+    minHourly: Number(minHourly.value),
+    maxPickup: Number(maxPickup.value),
+    maxTotal: Number(maxTotal.value),
+    enableAI: enableAI.checked,
+    ignoreBad: ignoreBad.checked,
+    testMode: testMode.checked,
+    airportMode: airportMode.checked,
+    avoidDowntown: avoidDowntown.checked,
+    hotZonesOnly: hotZonesOnly.checked
+  };
+
+  localStorage.setItem("ridesmart_filters", JSON.stringify(filters));
+
+  const toast = document.getElementById("toast");
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 1800);
+}
+
+// Bloque de eventos optimizado
+[
+  minDpm,
+  minHourly,
+  maxPickup,
+  maxTotal,
+  enableAI,
+  ignoreBad,
+  testMode,
+  airportMode,
+  avoidDowntown,
+  hotZonesOnly
+].forEach(el => {
+  el.addEventListener("input", updateLabels);
+  el.addEventListener("change", updateLabels);
+});
+
+loadFilters();
+</script>
+
+</body>
+</html>
